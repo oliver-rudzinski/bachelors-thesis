@@ -1,1 +1,1 @@
-# bachelors-thesis
+# Setup and Implementation of an Automated Testing Pipeline for a DataOps Use Case
