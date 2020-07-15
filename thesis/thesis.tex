@@ -1,0 +1,84 @@
+\input{config.tex}
+
+%===========================================================================
+
+\title{Setup and Implementation of an\\Automated Testing Pipeline for a\\DataOps Use Case} 
+\author{Oliver Rudzinski}
+\date{September \nth{07}, 2020}
+
+%===========================================================================
+
+\begin{document}
+\makeatletter
+
+%===========================================================================
+%	FRONT MATTER
+%===========================================================================
+	
+	\clearpage
+	\listoftodos
+	\thispagestyle{empty}
+	
+	\clearpage 
+	\input{front-matter/title.tex}
+	\thispagestyle{empty}
+	\pagenumbering{roman}
+	\selectlanguage{english}
+	
+	\clearpage 
+	
+	\chapter*{Erklärung\\{\color{gray}Declaration of Authorship}}
+	\input{front-matter/declaration.tex}
+	\thispagestyle{empty}
+	\addtocontents{toc}{\protect\thispagestyle{empty}}
+	
+	\clearpage
+	\input{front-matter/abstract.tex}
+	
+	{\small\tableofcontents}
+	\thispagestyle{empty}
+	
+	\chapter*{List of Acronyms} 
+	\addcontentsline{toc}{chapter}{List of Acronyms}
+	\input{front-matter/acronyms.tex}
+	
+	\listoffigures
+	
+	\listoftables
+	
+	\listoflistings
+	
+%===========================================================================
+%	MAIN MATTER
+%===========================================================================
+	
+	
+	\chapter{Introduction}
+	\pagenumbering{arabic}
+		
+
+	\chapter{Theoretical Backgrounds}
+
+
+	\chapter{Analytics Pipeline DataOps Enablement}
+	
+
+	\chapter{DataOps Testing}
+	
+
+	\chapter{Solution Evaluation}
+	
+	
+	\chapter{Conclusion}
+
+		
+		
+%===========================================================================
+%	BACK MATTER
+%===========================================================================
+
+	\pagestyle{plain}
+	\clearpage
+	\pagenumbering{alph}
+	\printbibliography
+\end{document}
