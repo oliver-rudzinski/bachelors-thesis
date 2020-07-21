@@ -12,7 +12,8 @@
 	footinclude	=	false,
 	listof		=	totoc,			% List of ... in TOC
 	toc			=	bibliography,	% Bibliography in TOC
-	draft		=	false
+	draft		=	false,
+	twoside
 ]{scrreprt}
 
 % Language and general symbol preferences
@@ -23,7 +24,9 @@
 \usepackage{soul}					% hyphening, etc.
 \usepackage[super]{nth}				% superscript "n-th" (counting, etc.)
 \usepackage{enumitem}
+\setlist[description]{font=\rmfamily\bfseries}
 \usepackage{paracol}
+\usepackage[babel]{csquotes}
 % Page preferences
 \usepackage[a4paper]{geometry}				
 \geometry{
@@ -88,6 +91,7 @@
 % Misc
 \setcounter{tocdepth}{1}				% Remove sub-sections from TOC
 \setcounter{lofdepth}{2}
+\setcounter{secnumdepth}{3}
 
 %===============================================================
 %	CUSTOM COMMANDS
