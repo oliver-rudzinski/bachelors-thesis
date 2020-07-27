@@ -17,9 +17,9 @@
 %	FRONT MATTER
 %===========================================================================
 	
-	\clearpage
-	\listoftodos
-	\thispagestyle{empty}
+	%\clearpage
+	%\listoftodos
+	%\thispagestyle{empty}
 	
 	\clearpage 
 	\input{front-matter/title.tex}
@@ -29,6 +29,8 @@
 	
 	\clearpage 
 	
+	\newpage \clearpage \thispagestyle{empty} \null
+	
 	\chapter*{Erklärung\\{\color{gray}Declaration of Authorship}}
 	\input{front-matter/declaration.tex}
 	\thispagestyle{empty}
@@ -36,6 +38,9 @@
 	
 	\clearpage
 	\input{front-matter/abstract.tex}
+	
+	\newpage \clearpage \thispagestyle{empty} \null
+	
 	{\small\tableofcontents}
 	\thispagestyle{empty}
 	
@@ -48,6 +53,8 @@
 	\listoftables
 	
 	\listoflistings
+	
+	\newpage \clearpage \thispagestyle{empty} \null
 	
 %===========================================================================
 %	MAIN MATTER
@@ -63,20 +70,24 @@
 		\input{main-matter/chapters/2-theoretical-backgrounds/2-theoretical-backgrounds.tex}
 		\label{chap:theoretical-backgrounds}
 
+	\chapter{Testing Framework Design Process}
+		\input{main-matter/chapters/3-testing-framework/3-testing-framework.tex}
+		\label{chap:testing-framework}
+
 	\chapter{Analytics Pipeline DataOps Enablement}
-		\input{main-matter/chapters/3-dataops-enablement/3-dataops-enablement.tex}
+		\input{main-matter/chapters/4-dataops-enablement/4-dataops-enablement.tex}
 		\label{chap:dataops-enablement}
 
 	\chapter{DataOps Testing}
-		\input{main-matter/chapters/4-dataops-testing/4-dataops-testing.tex}
+		\input{main-matter/chapters/5-dataops-testing/5-dataops-testing.tex}
 		\label{chap:dataops-testing}
 
 	\chapter{Solution Evaluation}
-		\input{main-matter/chapters/5-solution-evaluation/5-solution-evaluation.tex}
+		\input{main-matter/chapters/6-solution-evaluation/6-solution-evaluation.tex}
 		\label{chap:solution-evaluation}
 	
 	\chapter{Conclusion}
-		\input{main-matter/chapters/6-conclusion/6-conclusion.tex}
+		\input{main-matter/chapters/7-conclusion/7-conclusion.tex}
 		\label{chap:conclusion}
 		
 		
