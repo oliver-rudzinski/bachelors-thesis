@@ -96,18 +96,7 @@ Those three layers represent the \textit{Fuctional Testing} type since they are 
 
 Apart from that, other testing methods can be applied to each testing layer. \textit{Smoke Tests} are a subset within the entire test suite that cover core functionality required for the solution to \textit{just} run. Such tests can help to recognize the complexity of a software issue \cite[sec. 5]{Tarlinder2016}. Conducting \textit{Regression Tests} is also important. They aim to uncover errors with pre-existing components when other components were newly included, changed, or removed \cite[70]{Mahfuz2016}\cite{Mathur2013}. This is especially crucial with data analytics solutions since historic data still needs to be processable after updating the analytics engine \cite{Shen2019}. To achieve regression testing in practice, unit tests can be written in a more abstract manner and re-run for the entire software solution, requiring older unit tests still to pass \cite{Mathur2013}.
 \\\
+
 Putting everything into DataOps perspective, the Innovation Pipelines need to cover source code changes of the analytics solution. These \ac{cicd} pipelines need to embody traditional software tests to verify the correct behavior of the application. This also includes testing the \ac{spc} capability of the given solution \cite{DataKitchen2020}. For that reason, pathological test data needs to be provided that is able to invoke a majority of realistic events during the analytics process \cite[42]{Bergh2019}. In case of tests failing, the corresponding \ac{cicd} Innovation Pipeline can report the issue back to the developer, allowing for further understanding and correction.
 
 All in all, these tests are expected to invoke the majority of outcome possibilities, leading to a high test coverage and correct performance validation \cite{DataKitchen2020a}.
-
-  
-
-
-
-
-
-
-
-
-
-
