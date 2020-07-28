@@ -2,6 +2,9 @@
 # Literature Storage
 literature
 
+# Draw.io source files
+*.drawio
+
 # Created by .ignore support plugin (hsz.mobi)
 ### macOS template
 # General
