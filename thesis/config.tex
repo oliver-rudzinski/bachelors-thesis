@@ -23,10 +23,13 @@
 \usepackage[T1]{fontenc}
 \usepackage{soul}					% hyphening, etc.
 \usepackage[super]{nth}				% superscript "n-th" (counting, etc.)
+\usepackage{nameref}
 \usepackage{enumitem}
 \setlist[description]{font=\rmfamily\bfseries}
 \usepackage{paracol}
 \usepackage[babel]{csquotes}
+\usepackage{caption}
+\newenvironment{longlisting}{\captionsetup{type=listing}}{}
 % Page preferences
 \usepackage[a4paper]{geometry}				
 \geometry{
@@ -70,13 +73,36 @@
 \setlength{\cftbeforechapskip}{5pt}
 \usepackage{array}					% Table management
 \usepackage{multirow}
+\usepackage{makecell}
+\renewcommand\theadalign{bc}
+\renewcommand\theadfont{\bfseries}
+\renewcommand\theadgape{\Gape[4pt]}
+\renewcommand\cellgape{\Gape[4pt]}
+\newcommand\ChangeRT[1]{\noalign{\hrule height #1}}
+
 \usepackage{acronym}				% Acronym management
 \usepackage{graphicx}				% Figure management
 \usepackage{subfig}
 \usepackage{hyperref}				% Referencing management
 \hypersetup{}
 \usepackage{minted}					% Source code management
-\setminted[python]{
+\setminted[sql]{
+	autogobble,
+	baselinestretch=1,
+	breaklines,
+	frame=lines,
+	fontsize=\footnotesize,
+	framesep=3mm
+}
+\setminted[xml]{
+	autogobble,
+	baselinestretch=1,
+	breaklines,
+	frame=lines,
+	fontsize=\footnotesize,
+	framesep=3mm
+}
+\setminted[json]{
 	autogobble,
 	baselinestretch=1,
 	breaklines,
