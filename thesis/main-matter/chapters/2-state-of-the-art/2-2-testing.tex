@@ -1,0 +1,57 @@
+The previous section introduced where testing aspects can be found within DataOps. This section presents the current state of the art for software and data quality testing. Both disciplines will be evaluated and used within the testing framework design process.
+
+\subsection{Why Do We Need Testing?}
+In general, software development relies on testing principles to holistically and objectively validate the expected performance of a piece of software. Nowadays, organizations depend on data analytics more than ever \cite{Munawar2011}. \ac{bi} and \ac{dwh} solutions are designed to utilize data for business-required decision making \cite{Souibgui2019}. While these systems are expected to generate value, many companies lose trust in their data analytics because it might be prone to unforeseeable errors \cite{BISurvey.com}. This is because \ac{bi} and \ac{dwh} systems rely on high-quality data in order to provide representative analytics results and business insights \cite{Munawar2011}. Unfortunately, data quality issues of various sorts and manifestations lead to the systems generating false and potentially misleading reports \cite{Munawar2011}\cite{Freudiger2014}\cite{Redman2016}. Testing the solution for its expected performance at various analytics steps might help solve the underlying issues or even exhaust them completely. 
+
+From a pure software perspective, it is desired that the solution does not break or crash during analytics performance for an unforeseeable reason. Applicable software tests could recognize such issues prior to production deployment, reducing or completely removing crucial bugs inside the software \cite[105\psqq]{ORegan2017}. \\\
+
+As previously mentioned in Section \ref{sec:2-1-devops}, the pipeline duality ensures continuous flow of both production-grade data analytics as well as improvement and enhancement of the solution. Both pipelines require individual testing measures. This is referred to as \enquote{The Duality of [DataOps] Testing.} \cite[40\psqq]{Bergh2019}
+
+\subsection{Value Pipeline: Data Quality Testing} \label{sec:2-2-value-pipeline}
+Since the Value Pipeline is in charge of the business-critical real-time analysis of various data, the solution-in-use must guarantee the recognition and handling of data quality issues prior, during, and after each individual processing step by means of its \ac{spc} capability. In other words, while the underlying analytics software is static, the variance of data is arbitrarily large and needs to be handled properly. In order to define this kind of event handling, unified data quality dimensions are required.
+
+The \ac{dama} in the United Kingdom defined \enquote{The Six Primary Dimensions for Data Quality Assessment} in 2013 \cite[7\psqq]{Askham2013}. They consist of:
+
+\begin{description}
+	\item[Completeness] describes the proportion of the stored data against the potential of being \textit{complete} by means of a use-case-specific completeness definition \cite[8]{Askham2013}\cite{Shen2019}.
+	\item[Uniqueness] is achieved when each unique data record only exists once inside the entire database at hand \cite[9]{Askham2013}.
+	\item[Timeliness] is the degree to which data represents the reality from the required point in time \cite[10]{Askham2013}.
+	\item[Validity] describes a data item corresponding to its expected (and therefore, pre-defined) format, schema, syntax, etc. This definition should also include a range of expected or acceptable variation thresholds \cite[11]{Askham2013}. Testing for data schematics is one processes which allows for definitive objective differentiation between good and bad data \cite{Schieferdecker2012}.
+	\item[Accuracy] is the degree to which data \textit{correctly} describes the actual object or event existing in the real world \cite[12]{Askham2013}.
+	\item[Consistency] describes the absence of difference when comparing multiple representations of the same real-life object against its actual definition \cite[13]{Askham2013}.
+\end{description}
+
+It can be seen that the areas of data quality are mostly covered when data complies with the corresponding data governance definitions \cite{Schieferdecker2012}. These definitions build the foundation for a valid testing framework.
+
+In practice, checks based on these dimensions have to be embodied inside the data analytics solution. Based on mentioned, use-case-specific requirements, a data flow can be checked by means of those dimensions, leading to recovery measures inside the system, or a system failure with appropriate error reporting.
+
+\subsection{Innovation Pipelines: Software Testing} \label{sec:2-2-innovation-pipeline}
+Section \ref{sec:2-1-devops} describes the Innovation Pipelines as DataOps-specific \ac{cicd} pipelines. Apart from the build and deployment process, a major part of these pipelines is represented by software testing. Whenever a developer intends to update the codebase, a number of tests of various levels is conducted, visualized in the pyramid graphic in Figure \ref{fig:2-testing-pyramid} below.
+
+Depending on the type of software, the types and levels of testing can vary. For data analytics solutions with \acp{ui} outside their scope, the three foundational levels suffice.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics{main-matter/img/2-2-3-testing-pyramid.pdf}
+	\caption{Software Testing Level Pyramid}
+	\label{fig:2-testing-pyramid}
+\end{figure}
+
+\newpage
+
+
+
+\begin{description}
+	\item[Unit Tests] take individual components (i.e., \textit{units}) from the source code and check their behavior. Unit tests are pieces of code that invoke the chosen test unit and compare its actual result with the expected outcome \cite[sec. 1]{Osherove2013}. They are characterized as granular, thus highly voluminous, repeatable, isolated, and idempotent \cite[sec. 2]{Osherove2013}.
+	\item[Integration Test] verify that multiple combined units are working together as expected. They focus on testing of interfaces that connect singular components \cite[66]{Mahfuz2016}. Integration tests are performed in a less isolated environment, resulting in more outside dependencies \cite[sec. 3]{Osherove2013}.
+	\item[End-to-End Tests] describe the highest level of software testing \cite[67]{Mahfuz2016}. For the sake of simplicity, system tests are treated as a part of end-to-end tests within this work. End-to-end tests are performed under a (close-to) deployment situation. This creates an idealized real-life scenario. Thus, end-to-end testing is the least isolated level and serves as the final test stage before actual deployment. \cite[67]{Mahfuz2016}.
+\end{description}
+
+
+
+Those three layers represent the \textit{Fuctional Testing} type since they are built based on the functional requirements of a software solution \cite[69]{Mahfuz2016}. Its counterpart, \textit{Non-Functional Testing}, covers aspects like load, performance, security, etc. \cite[70]{Mahfuz2016}.
+
+Apart from that, other testing methods can be applied to each testing layer. \textit{Smoke Tests} are a subset within the entire test suite that cover core functionality required for the solution to \textit{just} run. Such tests can help to recognize the complexity of a software issue \cite[sec. 5]{Tarlinder2016}. Conducting \textit{Regression Tests} is also important. They aim to uncover errors with pre-existing components when other components were newly included, changed, or removed \cite[70]{Mahfuz2016}\cite{Mathur2013}. This is especially crucial with data analytics solutions since historic data still needs to be processable after updating the analytics engine \cite{Shen2019}. To achieve regression testing in practice, unit tests can be written in a more abstract manner and re-run for the entire software solution, requiring older unit tests still to pass \cite{Mathur2013}.
+\\\
+
+Putting everything into DataOps perspective, the Innovation Pipelines need to cover source code changes of the analytics solution. These \ac{cicd} pipelines need to embody traditional software tests to verify the correct behavior of the application. This also includes testing the \ac{spc} capability of the given solution \cite{DataKitchen2020}. For that reason, pathological test data needs to be provided that is able to invoke a majority of realistic events during the analytics process \cite[42]{Bergh2019}. In case of tests failing, the corresponding \ac{cicd} Innovation Pipeline can report the issue back to the developer, allowing for further understanding and correction.

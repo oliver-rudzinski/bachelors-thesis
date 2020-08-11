@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsi:POSLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Transaction CancelFlag="false" OfflineFlag="false" TrainingModeFlag="false">
+    <RetailStoreID>High Street</RetailStoreID> <!-- retail store name -->
+    <RevenueCenterID>6333-1221</RevenueCenterID> <!-- arbitrary -->
+    <WorkstationID>POS5</WorkstationID> <!-- arbitrary -->
+    <TillID>22</TillID> <!-- arbitrary -->
+    <SequenceNumber>1000000000</SequenceNumber> <!-- POS receipt number -->
+    <BusinessDayDate>2001-08-13</BusinessDayDate> <!-- POS date -->
+    <BeginDateTime>2001-08-13T09:03:00</BeginDateTime> <!-- POS start datetime -->
+    <EndDateTime>2001-08-13T09:05:00</EndDateTime> <!-- POS end datetime -->
+    <OperatorID>Gosho</OperatorID> <!-- arbitrary -->
+    <CurrencyCode>USD</CurrencyCode> <!-- arbitrary -->
+    
+    <!-- BEGINNING OF POS DATA -->
+    <RetailTransaction OutsideSalesFlag="false" Version="2.2"> 
+      <ManagerApproval>false</ManagerApproval>
+      <ReceiptDateTime>2001-08-13T09:04:32</ReceiptDateTime>
+      <LineItem VoidFlag="false">
+        <SequenceNumber>1</SequenceNumber> <!-- incrementing sequence number (order) -->
+        <BeginDateTime>2001-09-16T09:04:00</BeginDateTime>
+        <EndDateTime>2001-09-16T09:04:03</EndDateTime>
+        <Sale ItemType="Stock"> 
+          <ItemID>FD7865</ItemID> <!-- first letter is type identifier (F = Food, N = Non-Food) -->
+          <MerchandiseHierarchy Level="Department">Candies</MerchandiseHierarchy> <!-- item category -->
+          <ItemNotOnFileFlag>false</ItemNotOnFileFlag> <!-- arbitrary -->
+          <Description>20oz HERSHEY'S</Description> <!-- specific product -->
+          <TaxIncludedInPriceFlag>false</TaxIncludedInPriceFlag>
+          <!-- PRICING -->
+          <UnitCostPrice>1.23</UnitCostPrice>
+          <UnitListPrice>1,79</UnitListPrice> 
+          <RegularSalesUnitPrice>1.63</RegularSalesUnitPrice> 
+          <InventoryValuePrice>1.23</InventoryValuePrice> 
+          <ActualSalesUnitPrice>1.63</ActualSalesUnitPrice> 
+          <ExtendedAmount>4.89</ExtendedAmount> 
+          <DiscountAmount>0.00</DiscountAmount>
+          <ExtendedDiscountAmount>4.89</ExtendedDiscountAmount>
+          <Quantity>3</Quantity> <!-- number of items purchased -->
+          <POSIdentity>
+            <POSItemID>01532226057966</POSItemID>
+          </POSIdentity>
+        </Sale>
+      </LineItem>  
+      <LineItem VoidFlag="false">
+        <!-- ... -->
+      </LineItem>
+      <!-- ... -->
+      <LineItem>
+        <Total TotalType="TransactionGrossAmount">44.01</Total> 
+      </LineItem>
+    </RetailTransaction>
+  </Transaction>
+</xsi:POSLog>

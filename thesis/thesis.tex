@@ -17,9 +17,9 @@
 %	FRONT MATTER
 %===========================================================================
 	
-	\clearpage
-	\listoftodos
-	\thispagestyle{empty}
+	%\clearpage
+	%\listoftodos
+	%\thispagestyle{empty}
 	
 	\clearpage 
 	\input{front-matter/title.tex}
@@ -29,6 +29,8 @@
 	
 	\clearpage 
 	
+	\newpage \clearpage \thispagestyle{empty} \null
+	
 	\chapter*{Erklärung\\{\color{gray}Declaration of Authorship}}
 	\input{front-matter/declaration.tex}
 	\thispagestyle{empty}
@@ -36,6 +38,9 @@
 	
 	\clearpage
 	\input{front-matter/abstract.tex}
+	
+	\newpage \clearpage \thispagestyle{empty} \null
+	
 	{\small\tableofcontents}
 	\thispagestyle{empty}
 	
@@ -49,6 +54,8 @@
 	
 	\listoflistings
 	
+	\newpage \clearpage \thispagestyle{empty} \null
+	
 %===========================================================================
 %	MAIN MATTER
 %===========================================================================
@@ -56,28 +63,32 @@
 	
 	\chapter{Introduction}
 	\pagenumbering{arabic}
+		\label{chap:introduction}
 		\input{main-matter/chapters/1-introduction/1-introduction.tex}
-		\label{chap:introduction}	
-
-	\chapter{Theoretical Backgrounds}
-		\input{main-matter/chapters/2-theoretical-backgrounds/2-theoretical-backgrounds.tex}
+			
+	\chapter{State of the Art}
 		\label{chap:theoretical-backgrounds}
+		\input{main-matter/chapters/2-state-of-the-art/2-state-of-the-art.tex}
 
-	\chapter{Analytics Pipeline DataOps Enablement}
-		\input{main-matter/chapters/3-dataops-enablement/3-dataops-enablement.tex}
-		\label{chap:dataops-enablement}
+	\chapter{Actual State Analysis}
+		\label{chap:actual-state-analysis}
+		\input{main-matter/chapters/3-actual-state-analysis/3-actual-state-analysis.tex}		
 
-	\chapter{DataOps Testing}
-		\input{main-matter/chapters/4-dataops-testing/4-dataops-testing.tex}
-		\label{chap:dataops-testing}
+	\chapter{Testing Framework Design}
+		\label{chap:testing-framework}
+		\input{main-matter/chapters/4-testing-framework/4-testing-framework.tex}
+
+	\chapter{Implementation}
+		\label{chap:implementation}
+		\input{main-matter/chapters/5-implementation/5-implementation.tex}
 
 	\chapter{Solution Evaluation}
-		\input{main-matter/chapters/5-solution-evaluation/5-solution-evaluation.tex}
 		\label{chap:solution-evaluation}
+		\input{main-matter/chapters/6-solution-evaluation/6-solution-evaluation.tex}
 	
 	\chapter{Conclusion}
-		\input{main-matter/chapters/6-conclusion/6-conclusion.tex}
 		\label{chap:conclusion}
+		\input{main-matter/chapters/7-conclusion/7-conclusion.tex}
 		
 		
 %===========================================================================
@@ -88,4 +99,9 @@
 	\clearpage
 	\pagenumbering{alph}
 	\printbibliography
+	
+	\appendix
+	\chapter{Appendix} \label{app:root}
+	\input{back-matter/appendix.tex}
+
 \end{document}
