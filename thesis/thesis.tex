@@ -20,7 +20,7 @@
 	%\clearpage
 	%\listoftodos
 	%\thispagestyle{empty}
-	
+	\pagestyle{plain}
 	\clearpage 
 	\input{front-matter/title.tex}
 	\thispagestyle{empty}
@@ -48,6 +48,8 @@
 	\addcontentsline{toc}{chapter}{List of Acronyms}
 	\input{front-matter/acronyms.tex}
 	
+	\newpage \clearpage \thispagestyle{empty} \null
+	
 	\listoffigures
 	
 	\listoftables
@@ -60,7 +62,7 @@
 %	MAIN MATTER
 %===========================================================================
 	
-	
+	\pagestyle{fancy}
 	\chapter{Introduction}
 	\pagenumbering{arabic}
 		\label{chap:introduction}
@@ -77,6 +79,8 @@
 	\chapter{Testing Framework Design}
 		\label{chap:testing-framework}
 		\input{main-matter/chapters/4-testing-framework/4-testing-framework.tex}
+
+	\newpage \clearpage \thispagestyle{empty} \null
 
 	\chapter{Implementation}
 		\label{chap:implementation}

@@ -86,10 +86,10 @@ This yields an output of the following format:
 
 Using an entire external service (i.e., \ac{aws} Athena) might appear to have a high overhead but could be leveraged especially in situations where the \ac{mba} input requires different data. In that case, only an \ac{sql} query would need to be updated, as opposed to the entire source code of one or multiple stages of the pipeline. In case the MBA does not change its requirements, it might be possible to handle the \ac{xml}-to-\ac{csv} conversion and reduction internally. The current solution applies \ac{aws} Athena for simplicity reasons.
 
-\section{Data Pipeline}
+\section{Data Pipeline} \label{sec:3-data-pipeline}
 The goal of the data pipeline is to integrate the input data (i.e., the \ac{pos}Log \ac{xml} files) and preparing the required accumulated, \ac{csv}-formatted data for the actual \ac{mba}. This process is divided into three preparatory data integration stages and followed by the fourth and final \ac{mba} stage.
 
-In theory, a data pipeline can be understood as a \ac{dag}, since it defines a specific flow direction as well as a beginning and an end of one analytics period. The pipeline \ac{dag} at hand is technically encapsulated inside the \textit{Apache Airflow} workflow software. It makes use of \acp{dag} to define, manage, and operate (analytical) workflows. Airflow is Python-driven and provides a \ac{ui} for real-time monitoring purposes \cite{airflow}, which makes it suitable for data analytics processes. It is important to mention that, currently, Airflow does not only orchestrate the analysis, but rather performs it. All analytics scripts are directly written into Airflow. The terms \textit{pipeline} and \textit{\ac{dag}} can be used interchangeably in the current state of the analytics solution. Its general structure is presented in Figure \ref{fig:3-data-pipeline} below.
+In theory, a data pipeline can be understood as a \ac{dag}, since it defines a specific flow direction as well as a beginning and an end of one analytics period. The pipeline \ac{dag} at hand is technically encapsulated inside the \textit{Apache Airflow} workflow software, residing on a \ac{aws} \ac{ec2} virtual server instance. It makes use of \acp{dag} to define, manage, and operate (analytical) workflows. Airflow is Python-driven and provides a \ac{ui} for real-time monitoring purposes \cite{airflow}, which makes it suitable for data analytics processes. It is important to mention that, currently, Airflow does not only orchestrate the analysis, but rather performs it. All analytics scripts are directly written into Airflow. The terms \textit{pipeline} and \textit{\ac{dag}} can be used interchangeably in the current state of the analytics solution. Its general structure is presented in Figure \ref{fig:3-data-pipeline} below.
 
 \begin{figure}[h!]
 	\includegraphics[width=\linewidth]{main-matter/img/3-3-data-pipeline.pdf}
@@ -138,7 +138,7 @@ The final step of this stage is to provide the data in a format that can be quer
 
 \begin{longlisting}
 	\inputminted{json}{main-matter/src/3-json.json}
-	\caption{Samle Converted Single-\acs{pos} \acs{json} File}
+	\caption{Sample Converted Single-\acs{pos} \acs{json} File}
 	\label{src:3-json}
 \end{longlisting}
 

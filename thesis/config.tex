@@ -3,16 +3,14 @@
 %	DOCUMENT PREFERENCES
 %===============================================================
 	parskip		=	half,			% remove first-row indent in new paragraph
-	headheight	= 	12pt,			% header height
-	footheight 	= 	16pt,			% footer height
-	headsepline,					% header separator line
-	footsepline,					% footer separator line
+	%headheight	= 	12pt,			% header height
+	%footheight 	= 	16pt,			% footer height
 	abstracton,						% Abstract headers
-	headinclude	=	false,		
-	footinclude	=	false,
 	listof		=	totoc,			% List of ... in TOC
 	toc			=	bibliography,	% Bibliography in TOC
 	draft		=	false,
+	footinclude	=	true,
+	headinclude =	true,
 	twoside
 ]{scrreprt}
 
@@ -31,13 +29,10 @@
 \usepackage{caption}
 \newenvironment{longlisting}{\captionsetup{type=listing}}{}
 % Page preferences
-\usepackage[a4paper]{geometry}				
-\geometry{
-	a4paper,
-	margin		=	2.5cm,
-	left		=	3.3cm,
-	foot 		= 	1.0cm
-}
+\usepackage[a4paper,
+			margin			=	2.5cm,
+  			bindingoffset	=	0.8cm,
+  			footskip 		= 	1.0cm]{geometry}				
 
 % Font preferences
 \usepackage{couriers}
@@ -49,16 +44,20 @@
 \onehalfspacing
 
 % Header & Footer preferences
-\usepackage{scrlayer-scrpage}		% Clear default settings
-\pagestyle{scrheadings}
-\clearpairofpagestyles
+\usepackage{fancyhdr}
 
-\ihead{Bachelor's Thesis (T3201)}	% Header left	(Type)
-\automark{chapter}					% Header right	(Chapter)
-\ohead{\rightmark}
-\ifoot{DHBW Stuttgart}				% Footer left	(School)
-\cfoot{Oliver Rudzinski}			% Footer center	(Author)
-\ofoot[\pagemark]{\pagemark}		% Footer right	(Page mark)
+\pagestyle{fancy}
+\fancyhf{}
+\chead{}
+\cfoot{}
+\fancyfoot[CE]{Bachelor's Thesis (T3201)}
+\fancyfoot[CO]{Oliver Rudzinski}
+\fancyfoot[LE,RO]{\thepage}		% Footer right	(Page mark)
+\fancyhead[LE]{\leftmark}
+\fancyhead[RO]{\rightmark}
+
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.5pt}
 
 %===============================================================
 %	ADDITIONAL PREFERENCES
@@ -109,6 +108,26 @@
 	frame=lines,
 	fontsize=\footnotesize,
 	framesep=3mm
+}
+
+\setminted[dockerfile]{
+	autogobble,
+	baselinestretch=1,
+	breaklines,
+	frame=lines,
+	fontsize=\footnotesize,
+	framesep=3mm,
+	linenos
+}
+
+\setminted[groovy]{
+	autogobble,
+	baselinestretch=1,
+	breaklines,
+	frame=lines,
+	fontsize=\footnotesize,
+	framesep=3mm,
+	linenos
 }
 \usemintedstyle{manni}	
 \usepackage{inconsolata}		
