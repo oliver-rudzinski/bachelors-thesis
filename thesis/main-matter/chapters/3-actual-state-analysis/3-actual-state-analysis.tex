@@ -99,6 +99,8 @@ In theory, a data pipeline can be understood as a \ac{dag}, since it defines a s
 
 As shown in Figure \ref{fig:3-data-pipeline}, the Transformation Stage scans the pre-defined data lake landing zone for ZIP archives. It decompresses the ZIP archives and loads all \ac{xml} files into a designated raw-file directory of the job-specific data lake space. The Conversion Stage takes the resulting data and prepares it for a serverless database integration, realized with \ac{aws} Athena. The Sanitization Stage queries the resulting table for the attributes required by the \ac{mba} engine. The query result is exported in \ac{csv} format and provided to the \ac{mba} engine, which performs the analysis in its designated \ac{mba} Stage, which represents the final stage of the data pipeline.
 
+All communication between the analytics solution and the various \ac{aws} resources is done via the \ac{aws} Python \ac{sdk} \texttt{boto3} \cite{boto3}.
+
 \newpage
 
 \subsection{Transformation Stage}

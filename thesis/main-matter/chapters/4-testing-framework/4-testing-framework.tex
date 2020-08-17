@@ -72,7 +72,7 @@ The degree of severity is important, since not every data quality issue has the 
 
 The \texttt{WARNING} and \texttt{ERROR} levels imply the implementation of thresholds that may reach a maximum appearance value for each level. Since errors are more severe than warnings by logic, the threshold for errors should also be stricter than the one for warnings.
 
-\subsection{Conversion Stage Input Data Events}
+\subsection{Conversion Stage Input Data Events} \label{sec:4-1-events}
 The data event definition process is now applied to the Conversion Stage. For redundancy reduction, the following events are chosen to provide the most distinct data event cases. The entire list of data events for the Conversion stage can be found in Appendix \ref{app:data-events}.
 \newpage
 \subsubsection{Example A: Data Source Empty} \label{sec:4-1-3-a}
@@ -105,8 +105,9 @@ At the beginning of the Conversion Stage, the previously unzipped \ac{xml} files
 	1. Remove corrupted file from analysis \\
 	2. Increase \texttt{ERROR} degree counter \\
 	3. Calculate threshold difference, terminate if exceeded \\
-	4. Log error including file information \\
-	5. Continue analytical process \\
+	4. Flag file (\texttt{xmlCorr-err}) \\
+	5. Log error including file information \\
+	6. Continue analytical process \\
 }                                   
 \end{tabular}
 
@@ -114,7 +115,7 @@ At the beginning of the Conversion Stage, the previously unzipped \ac{xml} files
 	\label{tab:4-xml-corrupted}
 \end{table}
 
-After the data has been recognized, it needs to run through a process of checking the file validity. This does not take the actual content of the \ac{xml} files into account but rather checks if the content is processable. If, for any reason, one or multiple source files are corrupted, they cannot be processed by means of the following steps. This represents an event with \texttt{ERROR} severity. Depending on the volume of source data, this data might be neglected and removed from the current analysis, or the analysis needs to be terminated because the threshold for \texttt{ERROR}-throwing events has been exceeded. This data event also applies to the data format issue category. This event definition can be similarly applied to empty data files or files with incorrect headers (i.e., non-\ac{pos}Log files) because of their comparable affects on the analytics outcome. \\\
+After the data has been recognized, it needs to run through a process of checking the file validity. This does not take the actual content of the \ac{xml} files into account but rather checks if the content is processable. If, for any reason, one or multiple source files are corrupted, they cannot be processed by means of the following steps. This represents an event with \texttt{ERROR} severity. Depending on the volume of source data, this data might be neglected and removed from the current analysis, or the analysis needs to be terminated because the threshold for \texttt{ERROR}-throwing events has been exceeded. A file tag is added to the source file that caused the event invocation for troubleshooting purposes. This data event also applies to the data format issue category. This event definition can be similarly applied to empty data files or files with incorrect headers (i.e., non-\ac{pos}Log files) because of their comparable affects on the analytics outcome. \\\
 
 
 \subsubsection{Example C: Missing Optional Attributes} \label{sec:4-1-3-c}
@@ -136,7 +137,7 @@ After the data has been recognized, it needs to run through a process of checkin
 	\caption{Data Event Example C: Missing Optional Attributes}
 \end{table}
 
-After the data has been validated for processing, its content needs to be evaluated as well. Considering the upcoming Sanitization Stage, it requires valid values for its \texttt{SequenceNumber}, \texttt{ItemCategory}, \texttt{ItemID}, as well as the \texttt{Quantity} attribute (cf. Source Code Excerpt \ref{src:3-athena-query}), hereinafter referred to as \textit{Required Attributes}. All remaining attributes (i.e., \textit{Optional Attributes}) are not relevant for the analysis but are still desired to be valid to rule out any unforeseen performance issues. Since the data is still processable by means of the current and upcoming pipeline stages, this data event is classified to have a rather minor impact on the overall outcome. Nevertheless, it should not occur too often since this could point to other issues inside the source data. Therefore, the \texttt{WARNING} event severity is applied here. In case its threshold is exceeded, the analysis will be terminated, similar to the \texttt{ERROR} event threshold. This data event applies to the data schema issue category. This event definition can be similarly applied to a \textit{data naming} or \textit{data extension} issue since it has a similarly low degree of severity for the analytics outcome. \\\
+After the data has been validated for processing, its content needs to be evaluated as well. Considering the upcoming Sanitization Stage, it requires valid values for its \texttt{SequenceNumber}, \texttt{ItemCategory}, \texttt{ItemID}, as well as the \texttt{Quantity} attribute (cf. Source Code Excerpt \ref{src:3-athena-query}), hereinafter referred to as \textit{Required Attributes}. All remaining attributes (i.e., \textit{Optional Attributes}) are not relevant for the analysis but are still desired to be valid to rule out any unforeseen performance issues. Since the data is still processable by means of the current and upcoming pipeline stages, this data event is classified to have a rather minor impact on the overall outcome. Nevertheless, it should not occur too often since this could point to other issues inside the source data. Therefore, the \texttt{WARNING} event severity is applied here. In case its threshold is exceeded, the analysis will be terminated, similar to the \texttt{ERROR} event threshold. Again, the source data receives a file tag. This data event applies to the data schema issue category. This event definition can be similarly applied to a \textit{data naming} or \textit{data extension} issue since it has a similarly low degree of severity for the analytics outcome. \\\
 
 Each further data event should be defined in such a manner that the severity of it is evaluated based on the data governance which can then propose handling measures for the implementation. It is also important to consider the order of the performed data quality checks. For example, checking for required arguments inside a file cannot happen before a data corruption check.
 
@@ -147,7 +148,7 @@ This means that all upcoming data events resulting in errors during transformati
 
 In other cases (e.g. \acs{ml} model training, which is not deterministic), the previous paragraph does not apply. Based on the use case and its circumstances, the handling of errors of all sorts need to be evaluated and defined appropriately.
 
-\section{Test Data Design}
+\section{Test Data Design} \label{sec:4-test-data-design}
 The next step is to create applicable test data suites in accordance to the data event definitions. During the DataOps Testing process, these data will be ingested into the analytics stage, determining if the data events are recognized and handled by the solution as expected. In general, the test data should remain as close to real production-grade data as possible, which also means the inclusion of production-grade values inside the \ac{pos}Log file (i.e., actual product descriptions, prices, realistic quantities, etc.).
 
 \subsection{Single-Event Test Data} \label{sec:4-single-event}
@@ -168,7 +169,7 @@ After the individual test cases have been run through, it might be reasonable to
 Given the Conversion Stage, approx. half of the data could be correct and valid. One fourth of the data might contain minor issues (e.g., incorrect file naming, missing optional arguments, etc.). The remaining fourth of the data might contain major issues (e.g., corrupted or empty files, missing required arguments, etc.). The predefined threshold values should be taken into account when designing such a test data suite.
 
 
-\section{DataOps Solution Testing Design}
+\section{DataOps Solution Testing Design} \label{sec:4-3-testing-architecture}
 The final step of the DataOps Testing framework design is to validate the functionality of the data event handling and the general solution by means of automated tests through the application of the test data suites. This makes use of the classical software testing paradigm (cf. Section \ref{sec:2-2-innovation-pipeline}):
 
 \begin{itemize}

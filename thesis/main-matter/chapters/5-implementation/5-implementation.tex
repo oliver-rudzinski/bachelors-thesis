@@ -213,5 +213,210 @@ Ansible requires an intermediate step before being able to perform actions on th
 Unfortunately, these applications do not provide all necessary Ansible endpoints. This means that not all configuration steps can be done automatically but require manual adjustment. This includes Jenkins credential management, pipeline creation, etc. All in all, the infrastructure automation is valuable nonetheless since the manual setup process is significantly reduced.
 
 \section{Testing Framework Implementation} \label{sec:5-testing-implementation}
+At this point, the DataOps capability of the \ac{mba} pipeline solution is sufficient to be enhanced by means of the testing framework, designed in Chapter \ref{chap:testing-framework}. The practical implementation of the framework goes hand-in-hand with its design steps.
+\begin{enumerate}
+	\item The data event handling mechanisms need to be implemented inside the productive analytics solution.
+	\item The test data (suites) need to be provisioned inside a separated data environment.
+	\item DataOps solution tests need to be written and executed by the Jenkins pipeline, making use of the available test data. The test outcome evaluation inside Jenkins will decide if the given version update may be deployed into production.
+\end{enumerate}
+
+\subsection{Data Event Handling Implementation}
+In general, the goal is that the data event handling inside the solution complies with its corresponding definition. When summarizing all event handling processes by means of their actions, the following capabilities need to be ensured:
+
+\begin{itemize}
+	\item Logging of different event severities.
+	\item Process termination for \texttt{CRITICAL} events.
+	\item Threshold adjustment and evaluation for \texttt{ERROR} and \texttt{WARNING} events.
+	\item Dynamic File Flagging for \texttt{ERROR} and \texttt{WARNING} events.
+\end{itemize}
+
+Again, there are multiple ways to achieve this kind of data handling capability in practice. In order to keep the productive analytics source code readable and maintainable, data handling is outsourced to its own class \texttt{DataHandling} that is instantiated inside the solution. It receives the references to the data in question, threshold limits, etc. during initialization. Each data event definition receives its own function which is then called by the solution at the appropriate point during its runtime. The visualization of the Conversion Stage, including all its data event handlers, is visualized in Figure \ref{fig:5-new-convert}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{main-matter/img/5-new-convert}
+	\caption{Conversion Stage Overview with Data Handling}
+	\label{fig:5-new-convert}
+\end{figure}
+
+For the sake of clarity, the following paragraphs elaborate on the implementation of the list of general features inside the \texttt{DataHandling} class before presenting exemplary implementations of several data handling functions.
+
+\subsubsection{Event Logging}
+Event logging in Python can be realized with Python's standard \texttt{logging} library. The default log severities \texttt{INFO}, \texttt{WARNING}, \texttt{ERROR}, and \texttt{CRITICAL} correspond with the event severities of the testing framework. The \texttt{logging} object is instantiated inside the \texttt{DataHandling} class and configured to write log occurrences of severity \texttt{INFO} and above to a specified file which receives the name of the current analytics job. Each time a log is required, the \texttt{logging} object is called with the message and arguments to be contained.
+
+\subsubsection{Process Termination}
+The analytical process needs to be terminated whenever an event of \texttt{CRITICAL} severity occurs. In order to provide helpful monitoring information, the termination should not just shut down the process. Instead, it should prompt a message on why the process needed to be terminated. On the one hand, this is included to the log file by means of the previous section. On the other hand, each critical event receives its own custom Python \textit{Exception}. This exception contains are log-like information message as well as a traceback to the origin of the exception, and hence, termination. This is expected to allow for better understanding and recovery from the underlying issue.
+
+\subsubsection{Thresholding Capability}
+As previously mentioned, the threshold percentages are passed to the \texttt{DataHandling} class during initialization. Currently, a value of $0.05$ for \texttt{ERROR} events and $0.1$ for \texttt{WARNING} events, is utilized. This means that five percent of the input data may invoke \texttt{ERROR}s and ten percent of the data may invoke \texttt{WARNING}s. The solution does not take files with multiple data issues into account differently. Eventually, the most severe event is counted for threshold evaluation. At the end of the input data event handling process, the threshold values are evaluated. The process terminates when either one of the thresholds is exceeded. As previously described, transformation and output data is not subject to threshold evaluation but results in instant termination in case an event is invoked.
+
+\subsubsection{File Flagging}
+\texttt{WARNING} and \texttt{ERROR} events additionally flag files by means of their invocation event. The \ac{aws} Python \ac{sdk} \texttt{boto3} is used for this matter since all data resides inside the \ac{s3} data lake. File flagging is implemented inside its own function which is called with the appropriate file reference (i.e., the file to be tagged) and the tag itself. \texttt{boto3} then requests all current tags for the file. In case the tag in question has not been set, it is added to the file now. The tagging information is provided inside the log file with \texttt{INFO} log severity.
+
+\subsubsection{Event Handling Implementation Examples}
+Now that the components of the event handing are defined, the individual handling functions can be implemented. The following examples go by the data event examples provided in Section \ref{sec:4-1-3-a}, \ref{sec:4-1-3-b}, and \ref{sec:4-1-3-c}.
+
+\paragraph{Example A: Data Source Empty}
+\begin{listing}[h!]
+	\inputminted{python}{main-matter/src/5-a.py}
+	\caption{Implementation of Data Event Example A: Data Source Empty}
+	\label{src:5-example-a-implementation}
+\end{listing}
+Source Code Excerpt \ref{src:5-example-a-implementation} implements the data event handling for an empty data source. The function receives the file references as a parameter (l. 1) and makes use of a \textit{guard} statement to rule out an empty data source first (l. 2). In case this condition does not apply, the function logs the \texttt{CRITICAL} event to the log file, providing information on the \ac{s3} bucket and bucket directory in question (ll. 4--8). These have been passed to the class instance during initialization. At the end, it raises the custom \texttt{S3EmptyError} exception that terminates the process. The exception is prompted, again, with bucket and directory information (l. 9) for improved troubleshooting.
+
+\paragraph{Example B: XML File(s) Corrupted}
+\begin{listing}[h!]
+	\inputminted{python}{main-matter/src/5-b.py}
+	\caption{Implementation of Data Event Example B: \acs{xml} File(s) Corrupted}
+	\label{src:5-example-b-implementation}
+\end{listing}
+Source Code Excerpt \ref{src:5-example-b-implementation} implements the data event handling for corrupted \ac{xml} files. Again, the corresponding function receives file references. Since there is a possibility that other \texttt{ERROR} events have already occurred and removed faulty input data, the function checks if there are any files left for evaluation (l. 2). Then, it loops through all files in question and attempts to parse their binary content to \ac{xml} (ll. 6--7). The function makes use of the Python \ac{xml} \texttt{ElementTree} sub-library (initialized as \texttt{et}). By design, the parser function raises an \texttt{ParseError} exception if the data is corrupted. By catching this library exception, the specific data handling can be processed. The log file receives a new line containing the corresponding file information (ll. 9-11). Additionally, the log also mentions that the file in question is skipped because of the \texttt{ERROR} event severity. The file name reference is added to another list that contains all corrupted files (l. 4 and 13) and the error file counter is incremented (l. 14). This will later be used for threshold evaluation. Finally, all corrupted files are removed from the original file reference dictionary (l. 15--16).
+
+\paragraph{Example C: Missing Optional Attributes}
+\begin{listing}[h!]
+	\inputminted{python}{main-matter/src/5-c.py}
+	\caption{Implementation of Data Event Example C: XML File(s) Corrupted}
+	\label{src:5-example-c-implementation}
+\end{listing}
+Source Code Excerpt \ref{src:5-example-c-implementation} implements the overall data event handling for missing global attributes. Since the event in question only covers the missing attributes, the handling of required attributes is omitted here (l. 6). At this point of the analysis, the binary \ac{xml} data has already been parsed to Python standard dictionaries, which is why the function received a dictionary of all \ac{pos} dictionaries (l. 1) and loops over the root dictionary (l. 2). As with the first example, a guard statement is used to rule out the case of any missing argument (ll. 3--4). Then, the keys of the content dictionary are evaluated against the class constant list of optional attributes (ll. 8--10). In case this evaluation results in arguments missing, a list of missing attributes is created (ll. 11-13) and logged alongside the input file name (ll. 14--20). Since this is an event of \texttt{WARNING} severity, the \texttt{WARNING} event file counter is incremented (l. 21) and evaluated at the end of input data event handling. Finally, the source data tagged via the custom tagging function (ll. 22-26)
+
+All further data events are implemented in a similar manner.
+
+\subsection{Test Data Provisioning}
+In order to test for correct data handling, appropriate test data is required to invoke the corresponding events. The design of the test data suited of various complexity degrees and use cases has been conducted in Section \ref{sec:4-test-data-design}. The goal now is to provision these suites in order for the planned, holistic DataOps testing integration. Specifically, the test data needs to be available for continuous testing in every phase of development. Since a centralized data lake already exists, the goal can be achieved by adding the test data to the data lake.
+
+\subsubsection{Data Lake Architecture Revision}
+The current architecture of the data lake only considers production-grade analytics processes. Simply adding the test data inside this critical environment could be prone to compatibility and analytics correctness issues. Plus, it goes against the DataOps principle of distinct environments. This is why the following data lake architecture revision is proposed:
+
+\begin{figure}[h!]
+	\centering
+	\missingfigure{New Data Lake}
+	\caption{Data Lake Architecture Revision}
+	\label{fig:5-new-data-lake}
+\end{figure}
+
+In the new structure, presented in Figure \ref{fig:5-new-data-lake}, the data lake is environmentally divided at the topmost level. One environment remains the otherwise unchanged production grade environment, containing raw input data as well as all analytics job subareas. The new testing environment now contains input data test suites for every stage of the pipeline. Since this data is also expected to be processed by the corresponding stage during testing, the area has also got job subareas for each conducted test.
+
+With this change, the stages do not conduct test-grade analysis with production-grade data, but remain in a separated testing environment. The corresponding \ac{s3} \acp{uri}, containing test data, are passed to the individual stages. In case all future tests pass, the stages are permitted to receive the production-grade data locations afterwards.
+
+\subsubsection{\acs{iam} Role Revision}
+With new environments, new \ac{aws} \ac{iam} roles are required. This creates another layer of maintaining analytical integrity. In case a test stage receives production-grade data references, a correctly configured \ac{iam} role prevents it from performing. Developer sandboxes and their \ac{iam} roles can also be changed here such that the personal environment does not have access to potentially sensitive data.
+
+In practice, each stage receives a second \ac{iam} role for testing purposes. The corresponding credentials are passed as environment variables to the virtual stage container and replaced with the production-grade access credentials after the tests have passed. \\\
+
+With this method of test data provisioning, each environment (i.e., developer sandbox, local or \ac{cicd}-integrated testing, etc.) has access to the test data suites while restricting access to sensitive, production-grade data at the same time.
+
+\subsection{DataOps Testing Implementation}
+The DataOps testing implementation is expected to ensure that a new version of a solution is running as expected before being deployed into production. This requires separate testing classes that evaluate the functionality of the solution based on expected outcomes. As described in Section \ref{sec:4-3-testing-architecture}, this includes all testing levels (i.e., unit, integration, and end-to-end testing) covering both software and data-driven aspects of the solution. 
+
+In general, the Python testing framework \textit{PyTest} as well as applicable Python standard testing functions can be utilized for this purpose. With PyTest, individual testing classes are created. Each function inside a testing class can be seen as a single testing use case. The testing process in general performs a number of preparatory measures, runs the code piece at test and evaluates the outcome of the code under test. This happens by means of a comparison to the expected outcome. If these values correlate, the test passes and the next test case is performed. Otherwise, the test case fails and is prompted.
+
+The following paragraphs implement the testing classes for all testing levels of the Conversion Stage.
+
+\subsubsection{Unit Testing Implementation}
+The unit tests for the Conversion Stage are expected to cover the granular, software-driven aspects of the solution. Per testing convention, the functionality of external libraries is expected to have already been tested such that these do not require additional testing. Therefore, only the extraction of data source and destination locations remain for the purpose of unit testing.
+
+The outsourced \texttt{env} module covers this functionality. It received the corresponding values through a function given by the Python standard library \texttt{os}. There are multiple events that are caught at this point, which should not be mistaken with data events. The current events make sure that the \ac{s3} data location \acp{uri} are provided in the correct format. The remaining functions of the module extract individual parts of the \ac{uri} that are required by the solution at the point where these functions are called. These functions represent the code under test for Conversion Stage unit testing.
+
+The practical unit tests passes incorrectly formatted \ac{s3} \acp{uri} to the retrieval function and expects it recognize the issue and terminate the process. One of the test cases also provides a well-formatted \ac{uri} and expects that no issue is reported. The component extraction functions (for \ac{s3} bucket name and path extraction) are only invoked when the retrieval function reported no error. Thus, their test cases only pass correct \acp{uri} and compare their outcome (e.g., an \ac{s3} bucket name) to the hard-coded expectation based on the corresponding input \ac{uri}.
+
+\subsubsection{Integration (Data) Testing Implementation}
+Integration testing of the Conversion Stage evaluates the data handling measurements based on the predefined test data suites residing in the testing environment of the \ac{s3} data lake. Therefore, it plays a major role for Conversion Stage testing because of the large number of data events and the data-driven nature of the stage in general.
+
+Since the stage is expected to be capable of handing events regarding data format, schema, and value, three separate testing classes are created for the integration testing level. Now, each of the data event handling functions needs to be tested holistically. Specifically, the goal is to ensure the following aspects:
+
+\begin{itemize}
+	\item The appropriate data event handling function is called at the appropriate point inside the analytics solution.
+	\item The data event handling function performance complies with its definition (i.e., it performs all required measures if the event occurs).
+\end{itemize}
+
+The tests are supported by the previously defined test data suites, specifically the single-event and multi-event test data files (cf. Sections \ref{sec:4-single-event} and \ref{sec:4-multi-event}) that are now used to evaluate the performance of the data event handling. They are retrieved prior to the test execution and specified for each test case individually.
+
+The following paragraphs present the testing implementation of the data event handling function that checks for corrupted \ac{xml} files. This example provides the most individual test cases for a single data event out of the previously mentioned examples. Since corrupted \ac{xml} files belong to the data format issue category, the tests are included inside the \texttt{TestCovertDataFormat} class. All of the test cases are performed with a single test data file that represents an actually corrupted \ac{xml} file.
+
+\paragraph{Data Handling Function is Called}
+\begin{listing}[h!]
+	\inputminted{python}{main-matter/src/5-corrupted-calls.py}
+	\caption{Data Handling Function Call Test for Corrupted \ac{xml} Files}
+	\label{src:5-corrupted-calls}
+\end{listing}
+Source Code Excerpt \ref{src:5-corrupted-calls} represents the test case function that evaluates if the \texttt{remove\_corrupted(...)} function is called within the \texttt{xml\_to\_dict(...)} function of the analytics solution. Since the function call itself is always required, the input data for the function does not play a role. Since the data handling function is not explicitly known by the test function, it is mocked by the PyTest framework (l. 2). Then, \texttt{xml\_to\_dict(...)} is called with no data (which is arbitrary here) (l. 3). Finally, the test \textit{asserts} that the data handling function was indeed called (l. 4). An assertion in general returns \texttt{True} if the given condition (here, the function call) applies. If not, it returns \texttt{False}. 
+\newpage
+
+\paragraph{Data Handling Function Skips Corrupted File}
+\begin{listing}[h!]
+	\inputminted{python}{main-matter/src/5-corrupted-skips.py}
+	\caption{Data Handling Function Test for Skipping Corrupted \ac{xml} Files}
+	\label{src:5-corrupted-skips}
+\end{listing}
+Source Code Excerpt \ref{src:5-corrupted-skips} represents the test case function that evaluates if the a corrupted \ac{xml} file is skipped within the \texttt{xml\_to\_dict(...)} function of the analytics solution. The implementation does not explicitly test the data handling function but its actions. This approach was chosen since the implementation of such a function might change, but the fact that corrupted \ac{xml} files cannot be processed does not change. The function specifies the corrupted \ac{xml} file (l. 2) and loads it inside a Python dictionary from the \ac{s3} bucket (ll. 4--8). This dictionary is required by the \texttt{xml\_to\_dict(...)} function as its parameter. The function is then called with the prepared dictionary (l. 11). Since the corrupted file has been the only file in scope of the test, the test finally asserts if the dictionary is empty after the function call which would mean that the file has been skipped successfully. Since this process is also logged, the test function mocks the logging mechanism (l. 10) and asserts that the information has been added to the log file (l. 13). 
+\newpage
+\paragraph{Data Handling Function Logs Corrupted File}
+\begin{listing}[h!]
+	\inputminted{python}{main-matter/src/5-corrupted-logs.py}
+	\caption{Data Handling Function Test for Logging Corrupted \ac{xml} Files}
+	\label{src:5-corrupted-logs}
+\end{listing}
+Source Code Excerpt \ref{src:5-corrupted-logs} represents the test case function that evaluates if a corrupted \ac{xml} file is logged when the \texttt{xml\_to\_dict(...)} function is executed. The process is very similar to the example above. The data is received from \ac{s3} (ll. 4--8), the logging mechanism for \texttt{ERROR} logs is mocked by PyTest (l. 10), and the \texttt{xml\_to\_dict(...)} function is called with the resulting dictionary (l. 11). The assertion evaluates the predefined string for corrupted \ac{xml} files matches with the actual outcome of the function call.
+
+\paragraph{Data Handling Function Tags Corrupted File}
+\begin{listing}[h!]
+	\inputminted{python}{main-matter/src/5-corrupted-tags.py}
+	\caption{Data Handling Function Test for Tagging Corrupted \ac{xml} Files}
+	\label{src:5-corrupted-tags}
+\end{listing}
+Source Code Excerpt \ref{src:5-corrupted-tags} represents the test case function that evaluates if a corrupted \ac{xml} file is tagged inside the \ac{s3} bucket when the \texttt{xml\_to\_dict(...)} function is executed. Again, the preliminary steps (ll. 3--11) are identical to the previous test cases. Only a \texttt{boto3} \textit{Client} (l. 2) for an \ac{s3} tag request (ll. 12--14) is added. This request returns a list of \ac{json} strings. The test function asserts if the corresponding tag \texttt{xmlCorr-err} is correctly set to the value \texttt{True}.
+
+All remaining data events are tested and evaluated in the same way.
+
+\paragraph{Threshold Evaluation} The threshold evaluation of the \texttt{DataHandling} class needs to be evaluated as well. This also includes checking if the data handling functions appropriately increase their file \texttt{ERROR} and \texttt{WARNING} counters. This is done by means of the test data suites that contain multiple data files with no, minor as well as major data quality issues (cf. Section \ref{sec:4-test-suites}). First, the test data suite is created and the expected threshold outcomes are calculated manually. The corresponding test case runs through the stage with the given test data suite and compares the actual threshold outcome with the expected one. On the one hand, this is evaluated by testing if the process is terminated because of the threshold being exceeded. On the other hand, the specific \texttt{ERROR} and \texttt{WARNING} percentages can be compared with the expected data issue percentages.
+
+\subsubsection{End-to-End Testing Implementation}
+Finally, end-to-end testing also brings Airflow into play such that all external resources are included in the testing process. It is important to remember that the areas covered by the unit or integration tests do not have to be repeated within end-to-end testing. Testing Airflow's impact on the analysis can be performed under the assumption that all other components have already been tested previously.
+
+In practice, two final test cases is created that invoke the entire data pipeline with the new version of the Conversion Stage. This is done by pre-deploying the Conversion Stage test image to \ac{ecr} and running the pipeline via the Airflow \acs{api} \cite{airflow}. One test case is run with a test data suite that is expected to terminate the process because of the threshold exceeding. This evaluates if Airflow correctly recognizes the process termination and stops the pipeline. The other test case is run with an acceptable test data suite. After the pipeline has run through, the exit status of the pipeline is evaluated, as well as the Conversion Stage output data in order to rule out any negative result impact resulting from Airflow. 
+
+\section{Testing Process Automation}
+The current testing solution only allows for local test execution. This is valuable for developers who can run their tests prior to filing a pull request for their new feature. The actual goal is to automate the tests by means of the prepared Jenkins \ac{cicd} environment. Additionally, all changes that have been made to the general project structure need to be included in the automation processes.
+
+The current Jenkins \ac{cicd} pipeline does not consider testing yet. In order to include testing inside the pipeline, the test files and classes need to be specified inside the project repository and Jenkinsfile. The following repository structure addition is proposed:
+
+\begin{figure}[h!]
+	\centering
+	\missingfigure{New Repo Overview}
+	\caption{Revisited Project Repository Structure (Testing Included)}
+	\label{fig:5-new-repo}
+\end{figure}
+
+Figure \ref{fig:5-new-repo} visualizes the testing-enabled repository. Each stage receives its own \texttt{test} directory. This directory contains all testing class files as well as a requirements document, specifying required external installation for testing purposes. This document is similar to the already existing \texttt{requirements.txt} file.
+
+With this change, Jenkins has now got access to the testing classes. Since the current Dockerfile already includes the entire stage module inside the image, the tests can already be run inside virtual Docker containers, which is desired. Currently, Jenkins only holds the production-grade \ac{iam} credentials inside is credential storage. The previously created \ac{iam} testing roles need to be added as well. Finally, the Jenkinsfile can be manipulated in order to provide appropriate testing stages inside the pipeline process.
+
+The build stage is changed such that the image is built with testing credentials rather than production-grade credentials. Additionally, Jenkins already specifies the test data locations during the image build process. In production, Airflow configures the required environment variables inside the task definition. With testing, Jenkins uses the unique Git commit identifier to define the data output location.
+
+Then, testing stages are implemented. Their structure is very similar. The testing stages of the Jenkinsfile are specified in Source Code Excerpt \ref{src:5-new-jenkinsfile-test}.
+
+\begin{listing}[h!]
+	\inputminted{groovy}{main-matter/src/5-new-jenkinsfile-test}
+	\caption{Testing Stages of the Revisited Jenkinsfile}
+	\label{src:5-new-jenkinsfile-test}
+\end{listing}
+
+The unit testing stage calls the corresponding unit testing class file (l. 13) when running the Docker container (ll. 9--15). Additionally, a host-to-container volume mount is performed (l. 10) such that Jenkins receives access to the testing report file (l. 14). This file is used to display the testing report inside the Jenkins \ac{ui}. The integration (data) tests are implemented similarly, but run in parallel (l. ) for a more appealing visualization. This does not cause any problems since these tests are run in entirely separate containers. The end-to-end test performs a pre-deployment prior to test execution (ll. 35--40). This is required because the test calls the Airflow \acs{api} to execute a test data pipeline including the new version image. 
+
+Finally, the test deployment is removed and the actual deployment, including production-grade credentials and no data location specification, is performed.
+
+The entire \ac{cicd} process is now visualized in Figure \ref{fig:5-cicd-testing} and is similar for each remaining data pipeline stage.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=\linewidth]{main-matter/img/cicd-testing.pdf}
+	\caption{Testing-Enabled \ac{cicd} Pipeline Overview}
+	\label{fig:5-cicd-testing}
+\end{figure}
+
+Finally, the environment changes (i.e., data lake structure and additional \ac{iam} role definitions) are added to the \ac{iac} process of the project. In case of an infrastructure rebuild, these components will be also generated and embedded automatically.
+
+This concludes the implementation task which is now subject to evaluation.
 
 
