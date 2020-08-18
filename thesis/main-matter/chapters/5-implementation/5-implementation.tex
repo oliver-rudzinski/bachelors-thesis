@@ -290,13 +290,13 @@ The current architecture of the data lake only considers production-grade analyt
 
 \begin{figure}[h!]
 	\centering
-	\missingfigure{New Data Lake}
+	\includegraphics[width=0.67\linewidth]{main-matter/img/5-data-lake-new}
 	\caption{Data Lake Architecture Revision}
 	\label{fig:5-new-data-lake}
 \end{figure}
 
 In the new structure, presented in Figure \ref{fig:5-new-data-lake}, the data lake is environmentally divided at the topmost level. One environment remains the otherwise unchanged production grade environment, containing raw input data as well as all analytics job subareas. The new testing environment now contains input data test suites for every stage of the pipeline. Since this data is also expected to be processed by the corresponding stage during testing, the area has also got job subareas for each conducted test.
-
+\newpage
 With this change, the stages do not conduct test-grade analysis with production-grade data, but remain in a separated testing environment. The corresponding \ac{s3} \acp{uri}, containing test data, are passed to the individual stages. In case all future tests pass, the stages are permitted to receive the production-grade data locations afterwards.
 
 \subsubsection{\acs{iam} Role Revision}
@@ -341,7 +341,6 @@ The following paragraphs present the testing implementation of the data event ha
 	\label{src:5-corrupted-calls}
 \end{listing}
 Source Code Excerpt \ref{src:5-corrupted-calls} represents the test case function that evaluates if the \texttt{remove\_corrupted(...)} function is called within the \texttt{xml\_to\_dict(...)} function of the analytics solution. Since the function call itself is always required, the input data for the function does not play a role. Since the data handling function is not explicitly known by the test function, it is mocked by the PyTest framework (l. 2). Then, \texttt{xml\_to\_dict(...)} is called with no data (which is arbitrary here) (l. 3). Finally, the test \textit{asserts} that the data handling function was indeed called (l. 4). An assertion in general returns \texttt{True} if the given condition (here, the function call) applies. If not, it returns \texttt{False}. 
-\newpage
 
 \paragraph{Data Handling Function Skips Corrupted File}
 \begin{listing}[h!]
@@ -383,18 +382,25 @@ The current Jenkins \ac{cicd} pipeline does not consider testing yet. In order t
 
 \begin{figure}[h!]
 	\centering
-	\missingfigure{New Repo Overview}
+	\includegraphics[width=\linewidth]{main-matter/img/5-repo-structure-new}
 	\caption{Revisited Project Repository Structure (Testing Included)}
 	\label{fig:5-new-repo}
 \end{figure}
 
 Figure \ref{fig:5-new-repo} visualizes the testing-enabled repository. Each stage receives its own \texttt{test} directory. This directory contains all testing class files as well as a requirements document, specifying required external installation for testing purposes. This document is similar to the already existing \texttt{requirements.txt} file.
 
-With this change, Jenkins has now got access to the testing classes. Since the current Dockerfile already includes the entire stage module inside the image, the tests can already be run inside virtual Docker containers, which is desired. Currently, Jenkins only holds the production-grade \ac{iam} credentials inside is credential storage. The previously created \ac{iam} testing roles need to be added as well. Finally, the Jenkinsfile can be manipulated in order to provide appropriate testing stages inside the pipeline process.
+With this change, Jenkins has now got access to the testing classes. Since the current Dockerfile already includes the entire stage module inside the image, the tests can already be run inside virtual Docker containers, which is desired. Currently, Jenkins only holds the production-grade \ac{iam} credentials inside is credential storage. The previously created \ac{iam} testing roles need to be added as well. Finally, the Jenkinsfile can be manipulated in order to provide appropriate testing stages inside the process, resulting in the pipeline depicted in Figure \ref{fig:5-cicd-testing}
 
-The build stage is changed such that the image is built with testing credentials rather than production-grade credentials. Additionally, Jenkins already specifies the test data locations during the image build process. In production, Airflow configures the required environment variables inside the task definition. With testing, Jenkins uses the unique Git commit identifier to define the data output location.
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=\linewidth]{main-matter/img/5-cicd-testing.pdf}
+	\caption{Testing-Enabled \ac{cicd} Pipeline Overview}
+	\label{fig:5-cicd-testing}
+\end{figure}
 
-Then, testing stages are implemented. Their structure is very similar. The testing stages of the Jenkinsfile are specified in Source Code Excerpt \ref{src:5-new-jenkinsfile-test}.
+The build stage is changed such that the image is built with testing credentials rather than production-grade credentials. Additionally, Jenkins already specifies the test data locations during the image build process. In production, Airflow configures the required environment variables inside the task definition. With testing, Jenkins uses the unique Git commit identifier to define the data output location. Then, testing stages are implemented. Their individual structures are very similar to each other. The testing stages of the Jenkinsfile are specified in Source Code Excerpt \ref{src:5-new-jenkinsfile-test}.
+
+The unit testing stage calls the corresponding unit testing class file (l. 13) when running the Docker container (ll. 9--15). Additionally, a host-to-container volume mount is performed (l. 10) such that Jenkins receives access to the testing report file (l. 14). This file is used to display the testing report inside the Jenkins \ac{ui}. The integration (data) tests are implemented similarly, but run in parallel (l. 24--30) for a more appealing visualization. This does not cause any problems since these tests are run in entirely separate containers. The end-to-end test performs a pre-deployment prior to test execution (ll. 35--40). This is required because the test calls the Airflow \acs{api} to execute a test data pipeline including the new version image.
 
 \begin{listing}[h!]
 	\inputminted{groovy}{main-matter/src/5-new-jenkinsfile-test}
@@ -402,20 +408,7 @@ Then, testing stages are implemented. Their structure is very similar. The testi
 	\label{src:5-new-jenkinsfile-test}
 \end{listing}
 
-The unit testing stage calls the corresponding unit testing class file (l. 13) when running the Docker container (ll. 9--15). Additionally, a host-to-container volume mount is performed (l. 10) such that Jenkins receives access to the testing report file (l. 14). This file is used to display the testing report inside the Jenkins \ac{ui}. The integration (data) tests are implemented similarly, but run in parallel (l. ) for a more appealing visualization. This does not cause any problems since these tests are run in entirely separate containers. The end-to-end test performs a pre-deployment prior to test execution (ll. 35--40). This is required because the test calls the Airflow \acs{api} to execute a test data pipeline including the new version image. 
-
-Finally, the test deployment is removed and the actual deployment, including production-grade credentials and no data location specification, is performed.
-
-The entire \ac{cicd} process is now visualized in Figure \ref{fig:5-cicd-testing} and is similar for each remaining data pipeline stage.
-
-\begin{figure}[h!]
-	\centering
-	\includegraphics[width=\linewidth]{main-matter/img/cicd-testing.pdf}
-	\caption{Testing-Enabled \ac{cicd} Pipeline Overview}
-	\label{fig:5-cicd-testing}
-\end{figure}
-
-Finally, the environment changes (i.e., data lake structure and additional \ac{iam} role definitions) are added to the \ac{iac} process of the project. In case of an infrastructure rebuild, these components will be also generated and embedded automatically.
+Finally, the test deployment is removed and the actual deployment, including production-grade credentials and no data location specification, is performed. The environment changes (i.e., data lake structure and additional \ac{iam} role definitions) are added to the \ac{iac} process of the project. In case of an infrastructure rebuild, these components will be also generated and embedded automatically.
 
 This concludes the implementation task which is now subject to evaluation.
 
