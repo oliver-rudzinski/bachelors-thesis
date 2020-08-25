@@ -1,0 +1,40 @@
+pipeline {
+  /* Preamble omitted */
+
+  stages {
+    /* Build stage... */
+    /* Testing stages... */
+    
+    stage('Deploy') {
+      steps {
+        /* Remove test deployment... */
+
+        withCredentials([usernamePassword(
+          credentialsId: 'mba-pipeline_PROD_conversion',
+          passwordVariable: 'AWS_KEY',
+          usernameVariable: 'AWS_ID')]) {
+          sh "
+            docker build -t <aws-user-id>.dkr.ecr.eu-central-1.amazonaws.com/
+                              conversion:${GIT_COMMIT_SHORT} 
+                         --build-arg aws_id=$AWS_ID
+                         --build-arg aws_key=$AWS_KEY
+                         -f stages/2_convert/build/Dockerfile 
+                         stages/2_convert
+          "
+          /* repeat for "latest" tag */
+        }
+
+        script {
+          docker.withRegistry(
+          'https://<aws-user-id>.dkr.ecr.eu-central-1.amazonaws.com',
+          'ecr:eu-central-1:aws') {
+            sh "docker push <aws-user-id>.dkr.ecr.eu-central-1.amazonaws.com/
+              conversion:${GIT_COMMIT_SHORT}"
+            sh "docker push <aws-user-id>.dkr.ecr.eu-central-1.amazonaws.com/
+              conversion:latest"
+          }   
+        }
+      }
+    }
+  }
+}

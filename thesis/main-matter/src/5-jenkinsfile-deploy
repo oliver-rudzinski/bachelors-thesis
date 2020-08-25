@@ -1,0 +1,23 @@
+pipeline {
+  /* Preamble omitted */
+
+  stages {
+    /* Build stage... */
+    /* Test stages... */ 
+
+    stage('Deploy') {
+      steps {
+        script {
+          docker.withRegistry(
+            'https://<aws-user-id>.dkr.ecr.eu-central-1.amazonaws.com',
+            'ecr:eu-central-1:aws') {
+            sh "docker push <aws-user-id>.dkr.ecr.eu-central-1.amazonaws.com/
+                  conversion:${GIT_COMMIT_SHORT}"
+            sh "docker push <aws-user-id>.dkr.ecr.eu-central-1.amazonaws.com/
+                  conversion:latest"
+          }
+        }
+      }
+    }
+  }
+}

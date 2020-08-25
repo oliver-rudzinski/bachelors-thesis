@@ -320,7 +320,7 @@ The outsourced \texttt{env} module covers this functionality. It received the co
 
 The practical unit tests passes incorrectly formatted \ac{s3} \acp{uri} to the retrieval function and expects it recognize the issue and terminate the process. One of the test cases also provides a well-formatted \ac{uri} and expects that no issue is reported. The component extraction functions (for \ac{s3} bucket name and path extraction) are only invoked when the retrieval function reported no error. Thus, their test cases only pass correct \acp{uri} and compare their outcome (e.g., an \ac{s3} bucket name) to the hard-coded expectation based on the corresponding input \ac{uri}.
 
-\subsubsection{Integration (Data) Testing Implementation}
+\subsubsection{Integration (Data) Testing Implementation} \label{sec:5-3-3-2}
 Integration testing of the Conversion Stage evaluates the data handling measurements based on the predefined test data suites residing in the testing environment of the \ac{s3} data lake. Therefore, it plays a major role for Conversion Stage testing because of the large number of data events and the data-driven nature of the stage in general.
 
 Since the stage is expected to be capable of handing events regarding data format, schema, and value, three separate testing classes are created for the integration testing level. Now, each of the data event handling functions needs to be tested holistically. Specifically, the goal is to ensure the following aspects:

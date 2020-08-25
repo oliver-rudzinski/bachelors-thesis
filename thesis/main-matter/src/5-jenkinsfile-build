@@ -1,0 +1,27 @@
+pipeline {
+  /* Preamble omitted */
+
+  stages {
+    stage('Build') {
+      steps {
+        sh 'echo Building "convert" stage image...'
+        withCredentials([usernamePassword(
+          credentialsId: 'mba-pipeline_conversion',
+          passwordVariable: 'AWS_KEY',
+          usernameVariable: 'AWS_ID')]) {
+          sh "
+            docker build -t <aws-user-id>.dkr.ecr.eu-central-1.amazonaws.com/
+                              conversion:${GIT_COMMIT_SHORT} 
+                         --build-arg aws_id=$AWS_ID
+                         --build-arg aws_key=$AWS_KEY
+                         -f stages/2_convert/build/Dockerfile 
+                         stages/2_convert
+          "
+        }
+      }
+    }
+
+    /* Test stages... */ 
+    /* Deploy stage... */ 
+  }
+}

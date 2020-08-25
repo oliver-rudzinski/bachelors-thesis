@@ -1,0 +1,47 @@
+pipeline {
+  /* Preamble omitted */
+
+  stages {
+    /* Build stage... */
+
+    stage('Unit Test') {
+      steps {
+        sh "
+          docker run -v $WORKSPACE/test:/usr/src/app/test/out 
+                     <aws-user-id>.dkr.ecr.eu-central-1.amazonaws.com/
+                       conversion:${GIT_COMMIT_SHORT}-test 
+                     pytest ./test/test_convert_unit.py 
+                     --junitxml ./test/out/unit-report.xml
+        "
+      }
+      post {
+        always {
+          junit "test/unit-report.xml"
+        }
+      }
+    }
+
+    stage('Data Test') {
+      parallel {
+        stage('Format Test') { /*...*/ }
+        stage('Schema Test') { /*...*/ }
+        stage('Value Test') { /*...*/ }
+      }
+    }
+
+    stage('End-to-End Test') {
+      steps {
+        script {
+          docker.withRegistry(
+            'https://<aws-user-id>.dkr.ecr.eu-central-1.amazonaws.com',
+            'ecr:eu-central-1:aws') {
+            sh "docker push <aws-user-id>.dkr.ecr.eu-central-1.amazonaws.com/
+                  conversion:${GIT_COMMIT_SHORT}-test"
+          }
+        }
+        sh /*"docker run..."*/
+      }
+      /* Test Report Handling... */
+    }
+  }
+}
