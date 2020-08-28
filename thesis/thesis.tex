@@ -40,7 +40,6 @@
 	\input{front-matter/abstract.tex}
 	
 	\newpage \clearpage \thispagestyle{empty} \null
-	
 	{\small\tableofcontents}
 	\thispagestyle{empty}
 	
@@ -49,11 +48,10 @@
 	\input{front-matter/acronyms.tex}
 	
 	\listoffigures
-	
+	\newpage \clearpage \thispagestyle{empty} \null
 	\listoftables
-	
+	\newpage \clearpage \thispagestyle{empty} \null
 	\listoflistings
-	
 	\newpage \clearpage \thispagestyle{empty} \null
 	
 %===========================================================================
@@ -66,7 +64,7 @@
 		\label{chap:introduction}
 		\input{main-matter/chapters/1-introduction/1-introduction.tex}
 
-
+	\newpage \clearpage \thispagestyle{empty} \null
 			
 	\chapter{State of the Art}
 		\label{chap:theoretical-backgrounds}
@@ -92,6 +90,7 @@
 		\label{chap:conclusion}
 		\input{main-matter/chapters/7-conclusion/7-conclusion.tex}
 		
+	\newpage \clearpage \thispagestyle{empty} \null
 		
 %===========================================================================
 %	BACK MATTER
@@ -101,6 +100,8 @@
 	\clearpage
 	\pagenumbering{alph}
 	\printbibliography
+	
+	\newpage \clearpage \thispagestyle{empty} \null
 	
 	\appendix
 	\chapter{Appendix} \label{app:root}
