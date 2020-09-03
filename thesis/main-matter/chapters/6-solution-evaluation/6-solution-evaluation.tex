@@ -41,7 +41,7 @@ Since the deployment has run through correctly, \ac{ecr} should have received a 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=\linewidth]{main-matter/img/6-ecr}
-	\caption{Image List of the Conversion Stage \acs{aws} \ac{ecr} Repository (Screenshot)}
+	\caption{Image List of the Conversion Stage \acs{aws} \acs{ecr} Repository (Screenshot)}
 	\label{fig:6-ecr}
 \end{figure}
 
@@ -52,7 +52,7 @@ The source code change is not reflected in the GitHub repository, yet. The featu
 At this point, one iteration of the \ac{cicd} workflow is completed.
 
 \section{Testing Capability Evaluation}
-The previous evaluation use case did not contain on purpose in order to demonstrate the desired development workflow. Now, the workflow of the pipeline is evaluated for different kinds of issues. In general, this is divided into two categories:
+The previous evaluation use case does intentionally not contain issues in order to demonstrate the desired development workflow. Now, the workflow of the pipeline is evaluated for different kinds of issues. In general, this is divided into two categories:
 
 \begin{enumerate}
 	\item issues that result from updating existing features, and
@@ -85,7 +85,7 @@ It can be seen that all tests regarding \ac{xml} corruption fail. This is becaus
 Similar failure detections occur with different changes of the source code. This shows that the pipeline is capable of stopping a deployment process based on the existing tests. This requires the assumption that all tests suites are complete and perform as expected.
 
 \subsection{Feature Creation Testing}
-The previous paragraphs covered the integration of an already existing feature. The following paragraphs deal with the creation and adequate testing of a new feature. The consideration of this practical area is important since the solution at hand can encounter changing requirements that need to be embodied accordingly.
+The previous paragraphs cover the integration of an already existing feature. The following paragraphs deal with the creation and adequate testing of a new feature. The consideration of this practical area is important since the solution at hand can encounter changing requirements that need to be embodied accordingly.
 
 For this evaluation, assume that the product owner of the \ac{mba} data pipeline requests a new feature that includes the weather data of the creation date of the purchase information to the analysis. This could be used to find a possible correlation between the purchasing behavior of the retail company's customers and the weather situation at the given point in time. The development teams find that the integration of weather data is mostly suited to be developed inside the Conversion Stage of the data pipeline since it represents the first stage that has access to the raw purchasing data.
 
@@ -109,7 +109,7 @@ Even with appropriate testing, the issue is still present. This is because the f
 This issue also introduces the discussion of \textit{testing tests} that are meant to test the functionality of the source code. The addition of testing validation based on previously mentioned complex testing quality metrics might mean more effort. With these validation systems, the question behind \textit{their} validity can be posed and the discussion continues. This ultimately means that automated tests might not suffice for confident and correct deployment of such a solution. Apart from that, peer code reviews and other interdisciplinary measures might need to be taken in order to rule out mistakes that cannot be uncovered by traditional software solution testing.
 
 \subsubsection{Importance of Regression Testing}
-Another issue can be found in regression. Assume that a previous \ac{mba} needs to be re-conducted because an error inside its values is suspected. The data from the target \ac{mba} originates from a time before this feature was requested. The previous \ac{mba} did also not consider weather data for its analysis. When the analysis is repeated, the \ac{mba} might, purposefully, yield different results. However, this behavior is not desired. The addition of a new feature may not lead to inconsistencies between two versions of the same analysis. This would create a new data quality issue and result in further issues in the upcoming analytical stages. Instead, this feature may only be used for new analyses (e.g. by specifying a minimum date that needs to be present in the input data). This behavior correctness needs to be ensured by including a corresponding test to the testing suite of the solution.
+Another issue can be found in regression. Assume that a previous \ac{mba} needs to be re-conducted because an error inside its values is suspected. The data from the target \ac{mba} originates from a time before this feature was requested. The previous \ac{mba} did also not consider weather data for its analysis. When the analysis is repeated, the \ac{mba} might, purposefully, yield different results. However, this behavior is not desired. The addition of a new feature shall not lead to inconsistencies between two versions of the same analysis. This would create a new data quality issue and result in further issues in the upcoming analytical stages. Instead, this feature may only be used for new analyses (e.g. by specifying a minimum date that needs to be present in the input data). This behavior correctness needs to be ensured by including a corresponding test to the testing suite of the solution.
 
 Another form of regression testing in this case is the execution of previous tests. Their passing will ensure that the new feature does not change the behavior of previously existing features. Since this feature only adds an attribute to the output of the stage, the previous features and feature tests run correctly. Other feature implementations might require the change of preexisting features which then might require the adaptation of the corresponding tests, etc. \\\
 
@@ -144,7 +144,7 @@ These cases are designed and invoked, leading to the following results:
 
 As can be seen in Table \ref{tab:6-bad-s3}, the corresponding unit test only tests if \ac{s3} \acsp{uri} of incorrect format are caught and reported. Since the \acs{uri} at hand is correct, the unit test passes. The integration (data) test actually connects to the bucket, resulting in an \texttt{boto3} exception, reporting that the provided \ac{s3} bucket does not exist.
 
-The process of mocking the \ac{s3} connection service inside the unit test would not have helped here since the actual existence of the infrastructure can only be evaluated within the scope of the infrastructure.
+The process of mocking the \ac{s3} connection service inside the unit test would not have helped here since the actual existence of the infrastructure can only be evaluated \textit{within} the scope of the infrastructure.
 \newpage
 \subsubsection{Invalid \ac{aws} \ac{iam} Credentials Provided}
 \begin{table}[h!]
@@ -155,7 +155,7 @@ The process of mocking the \ac{s3} connection service inside the unit test would
 \makecell[r]{\textbf{Result}}      & \cellcolor{green!25}passed        & \cellcolor{red!25}failed                                                                     & \cellcolor{gray!25}\textit{skipped}                \\ \hline
 \makecell[r]{\textbf{Information}} &               & \makecell[l]{\texttt{boto3} Exception:\\ \texttt{Access Denied}} &                    
 \end{tabular}
-\caption{Testing Evaluation: Invalid \ac{aws} \ac{iam} Credentials Provided}
+\caption{Testing Evaluation: Invalid \acs{aws} \acs{iam} Credentials Provided}
 \label{tab:6-bad-iam}
 \end{table}
 This case is similar to the incorrect \acs{uri} and results in the same test outcome, shown in Table \ref{tab:6-bad-iam}. Only the infrastructure itself can evaluate the credentials and report an issue. This is why, again, the unit test passes, while the integration test results in another exception, mentioning that the provided credentials cannot be used for the current operation.
@@ -172,8 +172,8 @@ This case is similar to the incorrect \acs{uri} and results in the same test out
 \caption{Testing Evaluation: \acs{ecs} Container Task Ran Out of Memory}
 \label{tab:6-oom}
 \end{table}
-In this case, both the unit and integration tests do not recognize the problem. Only the end-to-end test provides the information that the corresponding \ac{ecs} task has failed because of lacking memory capacity, shown in Table \ref{tab:6-oom} This is because the integration tests are performed in containerized environments on the Jenkins server instance. These Docker containers do not have any resource limitations \cite{docker}, other than the \ac{ecs} tasks that require performance specifications in their definitions. Only the end-to-end test makes use of this infrastructural service inside the solution.
-
+In this case, both the unit and integration tests do not recognize the problem. Only the end-to-end test provides the information that the corresponding \ac{ecs} task has failed because of lacking memory capacity, shown in Table \ref{tab:6-oom} This is because the integration tests are performed in containerized environments on the Jenkins server instance. These Docker containers do not have any resource limitations \cite{docker}, in contrast to the \ac{ecs} tasks that require performance specifications in their definitions. Only the end-to-end test makes use of this infrastructural service inside the solution.
+\newpage
 \subsection{Testing Impact Evaluation}
 The presented use cases yield a number of insights. First, the typical, DevOps-inspired testing level hierarchy and its degrees of testing isolation do not hold in an environment that is mostly created out of external resources. The cloud-driven infrastructure cannot be taken into account by unit tests since these are supposed to neglect these aspect and purely focus on the feature under test. When the infrastructure access is a crucial component of the feature, the unit test cannot recognize any issues.
 
@@ -181,7 +181,9 @@ Another aspect that follows is the strict separation of the testing levels. Taki
 
 Finally, the last failure use case that was only recognized by end-to-end testing opens up another discussion topic. In general, the performance measures could have been implemented into the integration testing level that makes use of Jenkins-driven Docker containers. This would require additional testing effort and, potentially, the redesign of the deployment structure within the \ac{cicd} pipeline. While the overall reason behind testing should be the validation of feature functionality, strictly focussing on the definition of the testing levels could increase time and cost inside the development process.
 
-As emphasized throughout this entire work, DataOps use cases and their corresponding automation and testing designs highly differ depending on the solution requirements, data governance definitions, etc. For the \ac{mba} data pipeline, unit tests provide little value to the actual testing expressiveness. There exists a general discussion questioning the value of unit tests \cite{Coplien}\cite{Golub2020}. This finding goes hand-in-hand with this discussion. The unit test cases might be included into the integration testing area and de-granularized for potentially better testing productivity. Further evaluation could give more insights on the impact differences between integration and end-to-end testing, leading to a generally more specialized, efficient and less tradition-driven testing architecture. Nevertheless, it is proposed that DataOps tests are categorized semantically regarding their meaning for the solution rather than focussing on testing level syntax.
+As emphasized throughout this entire work, DataOps use cases and their corresponding automation and testing designs highly differ depending on the solution requirements, data governance definitions, etc. For the \ac{mba} data pipeline, unit tests provide little value to the actual testing expressiveness. There exists a general discussion questioning the value of unit tests \cite{Coplien}\cite{Golub2020}. This finding goes hand-in-hand with this discussion. On the other hand, unit testing allows for better testing performance. When the practice of \textit{mocking} external services (i.e., mimicking the required service functionality inside the local test case) is exhausted, this performance benefit vanishes due to increasing testing design complexity. The unit test cases might be included into the integration testing area and de-granularized for potentially better testing productivity. Further evaluation could give more insights on the impact differences between integration and end-to-end testing, leading to a generally more specialized, efficient and less tradition-driven testing architecture. 
+
+All in all, it is proposed that DataOps tests are categorized semantically regarding their meaning for the solution rather than focussing on testing level syntax. Furthermore, testing design needs to be weighted up between the creation complexity of isolated tests as well as the urge for isolated unit test cases. \\\
 
 In generalization and comparison to the DevOps testing process, it can still be said that automated testing is performed inside its designated steps inside the \ac{cicd} process prior to deployment. However, data analytics solutions often have to deal with externalized services, that cannot be neglected during testing. Instead of sticking to the traditional testing pyramid, each solutions' architecture needs to be evaluated from a testability point of view in order to create a well-suited testing framework inside the DataOps use case.
 

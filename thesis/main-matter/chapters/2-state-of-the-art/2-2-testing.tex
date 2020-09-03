@@ -1,4 +1,4 @@
-The previous section introduced where testing aspects can be found within DataOps. This section presents the current state of the art for software and data quality testing. Both disciplines will be evaluated and used within the testing framework design process.
+The previous section introduced areas where testing aspects can be found within DataOps. This section presents the current state of the art for software and data quality testing. Both disciplines will be evaluated and used within the testing framework design process.
 
 \subsection{Why Do We Need Testing?}
 In general, software development relies on testing principles to holistically and objectively validate the expected performance of a piece of software. Nowadays, organizations depend on data analytics more than ever \cite{Munawar2011}. \ac{bi} and \ac{dwh} solutions are designed to utilize data for business-required decision making \cite{Souibgui2019}. While these systems are expected to generate value, many companies lose trust in their data analytics because it might be prone to unforeseeable errors \cite{BISurvey.com}. This is because \ac{bi} and \ac{dwh} systems rely on high-quality data in order to provide representative analytics results and business insights \cite{Munawar2011}. Unfortunately, data quality issues of various sorts and manifestations lead to the systems generating false and potentially misleading reports \cite{Munawar2011}\cite{Freudiger2014}\cite{Redman2016}. Testing the solution for its expected performance at various analytics steps might help solve the underlying issues or even exhaust them completely. 
@@ -8,7 +8,7 @@ From a pure software perspective, it is desired that the solution does not break
 As previously mentioned in Section \ref{sec:2-1-devops}, the pipeline duality ensures continuous flow of both production-grade data analytics as well as improvement and enhancement of the solution. Both pipelines require individual testing measures. This is referred to as \enquote{The Duality of [DataOps] Testing.} \cite[40\psqq]{Bergh2019}
 
 \subsection{Value Pipeline: Data Quality Testing} \label{sec:2-2-value-pipeline}
-Since the Value Pipeline is in charge of the business-critical real-time analysis of various data, the solution-in-use must guarantee the recognition and handling of data quality issues prior, during, and after each individual processing step by means of its \ac{spc} capability. In other words, while the underlying analytics software is static, the variance of data is arbitrarily large and needs to be handled properly. In order to define this kind of event handling, unified data quality dimensions are required.
+Since the Value Pipeline is in charge of the business-critical analysis of various data, the solution-in-use must guarantee the recognition and handling of data quality issues prior, during, and after each individual processing step by means of its \ac{spc} capability. In other words, while the underlying analytics software is static, the variance of data is arbitrarily large and needs to be handled properly \cite[p. 47, fig. 17]{Bergh2019}. In order to define this kind of event handling, unified data quality dimensions are required.
 
 The \ac{dama} in the United Kingdom defined \enquote{The Six Primary Dimensions for Data Quality Assessment} in 2013 \cite[7\psqq]{Askham2013}. They consist of:
 
@@ -23,7 +23,7 @@ The \ac{dama} in the United Kingdom defined \enquote{The Six Primary Dimensions 
 
 It can be seen that the areas of data quality are mostly covered when data complies with the corresponding data governance definitions \cite{Schieferdecker2012}. These definitions build the foundation for a valid testing framework.
 
-In practice, checks based on these dimensions have to be embodied inside the data analytics solution. Based on mentioned, use-case-specific requirements, a data flow can be checked by means of those dimensions, leading to recovery measures inside the system, or a system failure with appropriate error reporting.
+In practice, checks based on these dimensions have to be embodied inside the data analytics solution. Based on mentioned, use-case-specific requirements, a data flow can be checked by means of those dimensions, leading to recovery measures inside the system, or an intentional system failure with appropriate error reporting.
 
 \subsection{Innovation Pipelines: Software Testing} \label{sec:2-2-innovation-pipeline}
 Section \ref{sec:2-1-devops} describes the Innovation Pipelines as DataOps-specific \ac{cicd} pipelines. Apart from the build and deployment process, a major part of these pipelines is represented by software testing. Whenever a developer intends to update the codebase, a number of tests of various levels is conducted, visualized in the pyramid graphic in Figure \ref{fig:2-testing-pyramid} below.
@@ -33,7 +33,7 @@ Depending on the type of software, the types and levels of testing can vary. For
 \begin{figure}[h!]
 	\centering
 	\includegraphics{main-matter/img/2-2-3-testing-pyramid.pdf}
-	\caption{Software Testing Level Pyramid}
+	\caption[Software Testing Level Pyramid]{Software Testing Level Pyramid (per \cite{devops-google})}
 	\label{fig:2-testing-pyramid}
 \end{figure}
 

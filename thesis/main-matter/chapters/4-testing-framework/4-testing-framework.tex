@@ -10,13 +10,13 @@ The creation of a DataOps testing framework aims to assure the data and software
 	\item Create automated tests for the solution that make use of the test data suites to verify that the data quality and solution performance requirements are met. These tests will run whenever a new version of the solution is about to be deployed into production.
 \end{enumerate}
 
-This chapter takes these steps, elaborates on them, and applies the project's \ac{mba} data pipeline solution on the process. It aims to provide a guideline for designing a DataOps testing framework based on a given scenario. For the desired pilot demonstration, the definition of a testing framework for a specific step within the data pipeline is sufficient. The Conversion Stage of the \ac{mba} data pipeline is suited for this task since it prepares the Athena database integration of raw \ac{pos}Log data. This includes a variety of data transformation and processing, and thus, is prone to data quality issues throughout the entire flow of the stage.
+This chapter takes these steps, elaborates on them, and applies the project's \ac{mba} data pipeline solution on the process. It aims to provide a guideline for designing DataOps testing based on a given scenario. For the desired pilot demonstration, the definition of a testing framework for one specific stage within the data pipeline is sufficient. The Conversion Stage of the \ac{mba} data pipeline is suited for this task since it prepares the Athena database integration of raw \ac{pos}Log data. This includes a variety of data transformation and processing, and thus, is prone to data quality issues throughout the entire flow of the stage.
 
 \section{Data Quality Check Design}
 In order to check for data quality issues within a data flow, it is important to understand the different steps the given solution performs during its flow. As stated in Section \ref{sec:2-2-value-pipeline}, this also includes the inspection of the raw input data and the final processed output data. In a multi-stage environment, it is also important to consider the required input for the next pipeline stages, in this case, the Sanitization Stage.
 
 \subsection{Conversion Stage Data Governance Review}
-Input and output data requirements should be defined by the use case data governance. In the Conversion Stage's case, the input data should consist of one or multiple \ac{pos}Log \ac{xml} files (cf. Section \ref{sec:3-3-conversion}). The input data is also expected to be named in a unified format which contains retail branch store information, date information, as well as the identification number of the receipt (cf. Section \ref{sec:3-2-data-lake}). The data needs to originate from the \texttt{raw} subarea within the specific analytics job area inside the data lake (cf. Figure \ref{fig:3-data-lake}) The output data needs to be provided in \ac{json} file format, where one \ac{pos}Log \ac{xml} file yields one or multiple \ac{json} \ac{pos} files, containing global receipt as well as single-purchase information (cf. Section \ref{sec:3-3-conversion}), depending on the number of items from the source \ac{pos}Log file. Thus, the data values of the individual files do not change but get rather split up. For the output data, a similar unified naming format including the order of purchases from the original \ac{pos}Log file is also required. The data destination is the \texttt{prepared} subarea within the specific analytics job area inside the data lake. This data governance information can now be summarized in Table \ref{tab:4-data-gov-convert}:
+Input and output data requirements should be defined by the use case's data governance. In the Conversion Stage's case, the input data should consist of one or multiple \ac{pos}Log \ac{xml} files (cf. Section \ref{sec:3-3-conversion}). The input data is also expected to be named in a unified format which contains retail branch store information, date information, as well as the identification number of the receipt (cf. Section \ref{sec:3-2-data-lake}). The data needs to originate from the \texttt{raw} subarea within the specific analytics job area inside the data lake (cf. Figure \ref{fig:3-data-lake}) The output data needs to be provided in \ac{json} file format, where one \ac{pos}Log \ac{xml} file yields one or multiple \ac{json} \ac{pos} files, containing global receipt as well as single-purchase information (cf. Section \ref{sec:3-3-conversion}), depending on the number of items from the source \ac{pos}Log file. Thus, the data values of the individual files do not change but get rather split up and reformatted. For the output data, a similar unified naming format, including the order of purchases from the original \ac{pos}Log file, is also required. The data destination is the \texttt{prepared} sub-area within the specific analytics job area inside the data lake. This data governance information can now be summarized in Table \ref{tab:4-data-gov-convert}:
 
 \begin{table}[h!]
 	\centering
@@ -38,7 +38,6 @@ The corresponding format examples have already been provided in Source Code Exce
 
 As previously depicted in Figure \ref{fig:3-convert}, the Conversion Stage runs through the following data-focussed tasks to achieve the conversion:
 
-% Include Table or List
 \begin{enumerate}
 	\item Take the data from the \ac{s3} bucket and read its (binary) contents.
 	\item Map those contents to \texttt{OrderedDict}s using Python's \texttt{xmltodict} library
@@ -47,7 +46,7 @@ As previously depicted in Figure \ref{fig:3-convert}, the Conversion Stage runs 
 	\item Upload the files to the \ac{s3} bucket
 \end{enumerate}
 
-Each task is now prone to different sorts of data quality issues, each of those neglecting one or multiple \ac{dama} dimensions of data quality, mentioned in Section \ref{sec:2-2-value-pipeline}: \textit{Completeness} issues appear, when data which was actually saved by the retail register is missing during analysis. Since this project is based on pseudorandomly generated data, this dimension falls out of the scope of the testing framework. A lack of \textit{Uniqueness} happens when the analytics engine processes multiple identical \ac{pos}Log files. This check should be moved to the testing framework of the next stage since distinction checks are simpler to perform within \ac{sql}. In case the data is otherwise valid, \textit{Timeliness} problems can be found when the timestamp of the data file name does not correspond to the timestamp inside the \ac{pos}Log file. The Conversion Stage is mostly prone to \textit{Validity} issues, including the format of the input and output data, the schema of the corresponding files or specific values inside the files or intermediate transformation results. \textit{Accuracy}, again, falls out of scope since technical issues with a real-life register system are not covered inside this project.  \textit{Consistency} in a retail \ac{bi} solution is a two-edged sword, since product discounts, names, etc. can become updated over time.
+Each task is now prone to different sorts of data quality issues, each of those violating one or multiple \ac{dama} dimensions of data quality, mentioned in Section \ref{sec:2-2-value-pipeline}: \textit{Completeness} issues appear, when data which was actually saved by the retail register is missing during analysis. Since this project is based on pseudorandomly generated data, this dimension falls out of the scope of the testing framework. A lack of \textit{Uniqueness} happens when the analytics engine processes multiple identical \ac{pos}Log files. This check should be moved to the testing framework of the next stage since distinction checks are simpler to perform within \ac{sql}. In case the data is otherwise valid, \textit{Timeliness} problems can be found when the timestamp of the data file name does not correspond to the timestamp inside the \ac{pos}Log file. The Conversion Stage is mostly prone to \textit{Validity} issues, including the format of the input and output data, the schema of the corresponding files or specific values inside the files or intermediate transformation results. \textit{Accuracy}, again, falls out of scope since technical issues with a real-life register system are not covered inside this project.  \textit{Consistency} in a retail \ac{bi} solution is ambivalent, since product discounts, names, etc. can become updated over time.
 
 For the sake of simplicity during implementation, data timeliness aspects are also treated inside the scope of data validity. For the Conversion Stage, this results in the data quality categories \textit{Data Format Quality}, \textit{Data Schema Quality}, and \textit{Data Value Quality}.
 
@@ -61,19 +60,19 @@ The various potential data quality issues need to be defined in a unified format
 	\item[Handing] Detailed information on the handling of the data event
 \end{description}
 
-The degree of severity is important, since not every data quality issue has the same level of influence on the performance of the system. A corrupted file, which cannot be processed, should have a higher severity, potentially resulting in process termination. On the other hand, an exclusively incorrect file naming could have a minor impact on the analysis, but should not require a process termination. These severities need to be defined and justified individually based on the given use case, but a general classification of severity degrees could be useful. In the following, the severity levels based on a specification by Oracle \cite{oracle} are used:
+The degree of severity is important, since not every data quality issue has the same level of influence on the performance of the system. A corrupted file, which cannot be processed, should have a high severity. On the other hand, an exclusively incorrect file naming could have a minor impact on the analysis, but should not require a process termination. These severities need to be defined and justified individually based on the given use case, but a general classification of severity degrees could be useful. In the following, the severity levels based on a specification by Oracle \cite{oracle} are used:
 
 \begin{description}
-	\item[\texttt{INFO}] An informative message, usually describing task activity. No action is necessary.
-	\item[\texttt{WARNING}] Minor derivation from expected performance. Might cause analytical mistakes when appearing more often.
-	\item[\texttt{ERROR}] Major derivation from expected performance, but still recoverable. Will cause analytical mistakes when appearing more often.
-	\item[\texttt{FATAL}] Severe derivation from expected performance that cannot be recovered from. Causes immediate task termination.
+	\item[\texttt{INFO}] An informative message, usually describing task activity. No action is necessary (for logging purposes only).
+	\item[\texttt{WARNING}] Minor derivation from expected performance. \textit{Might} cause analytical mistakes when appearing more often.
+	\item[\texttt{ERROR}] Major derivation from expected performance, but still recoverable. \textit{Will} cause analytical mistakes when appearing more often.
+	\item[\texttt{CRITICAL}] Severe derivation from expected performance that cannot be recovered from. Causes immediate task termination.
 \end{description}
 
 The \texttt{WARNING} and \texttt{ERROR} levels imply the implementation of thresholds that may reach a maximum appearance value for each level. Since errors are more severe than warnings by logic, the threshold for errors should also be stricter than the one for warnings.
 
 \subsection{Conversion Stage Input Data Events} \label{sec:4-1-events}
-The data event definition process is now applied to the Conversion Stage. For redundancy reduction, the following events are chosen to provide the most distinct data event cases. The entire list of data events for the Conversion stage can be found in Appendix \ref{app:data-events}.
+The data event definition process is now applied to the Conversion Stage. For redundancy reduction, the following events are chosen to provide the most distinct data event cases. The lift of all derived data events for the Conversion Stage can be found in Appendix \ref{app:data-events}.
 \newpage
 \subsubsection{Example A: Data Source Empty} \label{sec:4-1-3-a}
 \begin{table}[h!]
@@ -81,7 +80,7 @@ The data event definition process is now applied to the Conversion Stage. For re
 \begin{tabular}{r!{\vrule width 1pt}l}
 \makecell[r]{\textbf{Description}} & \textbf{No data inside the designated data lake area} \\ \ChangeRT{1pt}
 \makecell[r]{\textbf{Category}}    & Data Format                         \\ \ChangeRT{0.5pt}
-\makecell[r]{\textbf{Severity}}    & \texttt{FATAL}                               \\ \hline
+\makecell[r]{\textbf{Severity}}    & \texttt{CRITICAL}                               \\ \hline
 \makecell[r]{\textbf{Handling}}    & \makecell[l]{
 	1. Log error including data lake location information \\
 	2. Prompt error information \\
@@ -91,14 +90,14 @@ The data event definition process is now applied to the Conversion Stage. For re
 	\caption{Data Event Example A: Data Source Empty}
 \end{table}
 
-At the beginning of the Conversion Stage, the previously unzipped \ac{xml} files need to be available for access. If, for any reason, the provided data source is empty, the process needs to terminate immediately, since the next steps (and, ultimately, the \ac{mba} itself) could not be performed without any data. Therefore, there is no recovery possible, which is why the process is terminated. The information on the empty \ac{s3} Bucket is prompted and logged. This data event mostly applies to the data format issue category. \\\
+At the beginning of the Conversion Stage, the previously unzipped \ac{xml} files need to be available for access. If, for any reason, the provided data source is empty, the process needs to terminate immediately, since the next steps (and, ultimately, the \ac{mba} itself) could not be performed without any data. Therefore, there is no recovery possible, which is why the process is terminated. The information on the empty \ac{s3} bucket is prompted and logged. This data event mostly applies to the data format issue category. \\\
 
 
 \subsubsection{Example B: \acs{xml} File(s) Corrupted} \label{sec:4-1-3-b}
 \begin{table}[h!]
 \centering
 \begin{tabular}{r!{\vrule width 1pt}l}
-\makecell[r]{\textbf{Description}} & \textbf{One or multiple XML files corrupted} \\ \ChangeRT{1pt}
+\makecell[r]{\textbf{Description}} & \textbf{One or multiple XML file(s) corrupted} \\ \ChangeRT{1pt}
 \makecell[r]{\textbf{Category}}    & Data Format                         \\ \ChangeRT{0.5pt}
 \makecell[r]{\textbf{Severity}}    & \texttt{ERROR}                               \\ \hline
 \makecell[r]{\textbf{Handling}}    & \makecell[l]{
@@ -115,7 +114,7 @@ At the beginning of the Conversion Stage, the previously unzipped \ac{xml} files
 	\label{tab:4-xml-corrupted}
 \end{table}
 
-After the data has been recognized, it needs to run through a process of checking the file validity. This does not take the actual content of the \ac{xml} files into account but rather checks if the content is processable. If, for any reason, one or multiple source files are corrupted, they cannot be processed by means of the following steps. This represents an event with \texttt{ERROR} severity. Depending on the volume of source data, this data might be neglected and removed from the current analysis, or the analysis needs to be terminated because the threshold for \texttt{ERROR}-throwing events has been exceeded. A file tag is added to the source file that caused the event invocation for troubleshooting purposes. This data event also applies to the data format issue category. This event definition can be similarly applied to empty data files or files with incorrect headers (i.e., non-\ac{pos}Log files) because of their comparable affects on the analytics outcome. \\\
+After the data has been recognized, it needs to run through a process of checking the file validity. This does not take the actual content of the \ac{xml} files into account but rather checks if the content is processable. If, for any reason, one or multiple source files are corrupted, they cannot be processed by means of the following steps. This represents an event with \texttt{ERROR} severity. Depending on the volume of source data, this data might be neglected and removed from the current analysis, or the analysis needs to be terminated because the threshold for \texttt{ERROR}-throwing events has been exceeded. A file tag is added to the source file that caused the event invocation for troubleshooting purposes. This data event also applies to the data format issue category. This event definition can be similarly applied to empty data files or files with incorrect headers (i.e., non-\ac{pos}Log files) because of their comparable effects on the analytics performance. \\\
 
 
 \subsubsection{Example C: Missing Optional Attributes} \label{sec:4-1-3-c}
@@ -126,25 +125,24 @@ After the data has been recognized, it needs to run through a process of checkin
 \makecell[r]{\textbf{Category}}    & Data Schema                         \\ \ChangeRT{0.5pt}
 \makecell[r]{\textbf{Severity}}    & \texttt{WARNING}                               \\ \hline
 \makecell[r]{\textbf{Handling}}    & \makecell[l]{
-	1. Calculate occurrences \\
-	2. Increase \texttt{WARNING} degree counter accordingly \\
-	3. Calculate threshold difference, terminate if exceeded \\
-	4. Flag file (\texttt{optArg-warn}) \\
-	5. Log warning including file information \\
-	6. Continue analytical process \\
+	1. Increase \texttt{WARNING} degree counter accordingly \\
+	2. Calculate threshold difference, terminate if exceeded \\
+	3. Flag file (\texttt{optArg-warn}) \\
+	4. Log warning including file information \\
+	5. Continue analytical process \\
 }           
 \end{tabular}
 	\caption{Data Event Example C: Missing Optional Attributes}
 \end{table}
 
-After the data has been validated for processing, its content needs to be evaluated as well. Considering the upcoming Sanitization Stage, it requires valid values for its \texttt{SequenceNumber}, \texttt{ItemCategory}, \texttt{ItemID}, as well as the \texttt{Quantity} attribute (cf. Source Code Excerpt \ref{src:3-athena-query}), hereinafter referred to as \textit{Required Attributes}. All remaining attributes (i.e., \textit{Optional Attributes}) are not relevant for the analysis but are still desired to be valid to rule out any unforeseen performance issues. Since the data is still processable by means of the current and upcoming pipeline stages, this data event is classified to have a rather minor impact on the overall outcome. Nevertheless, it should not occur too often since this could point to other issues inside the source data. Therefore, the \texttt{WARNING} event severity is applied here. In case its threshold is exceeded, the analysis will be terminated, similar to the \texttt{ERROR} event threshold. Again, the source data receives a file tag. This data event applies to the data schema issue category. This event definition can be similarly applied to a \textit{data naming} or \textit{data extension} issue since it has a similarly low degree of severity for the analytics outcome. \\\
+After the data has been validated for processing, its content needs to be evaluated as well. Considering the upcoming Sanitization Stage, it requires valid values for its \texttt{SequenceNumber}, \texttt{ItemCategory}, \texttt{ItemID}, as well as the \texttt{Quantity} attribute (cf. Source Code Excerpt \ref{src:3-athena-query}), hereinafter referred to as \textit{Required Attributes}. All remaining attributes (i.e., \textit{Optional Attributes}) are not relevant for the analysis but are still desired to be valid to rule out any unforeseen performance issues. Since the data is still processable by means of the current and upcoming pipeline stages, this data event is classified to have a rather minor impact on the overall outcome. Nevertheless, it should not occur too often since this could point to other issues inside the source data. Therefore, the \texttt{WARNING} event severity is applied here. In case its threshold is exceeded, the analysis will be terminated, similar to the \texttt{ERROR} event threshold. Again, the source data receives a file tag. This data event applies to the data schema issue category. Furthermore, a data event that covers the corresponding value of such an attribute would be categorized as a data value event. This event definition can be similarly applied to a \textit{data naming} or \textit{data extension} issue since it has a similarly low degree of severity for the analytics outcome. \\\
 
 Each further data event should be defined in such a manner that the severity of it is evaluated based on the data governance which can then propose handling measures for the implementation. It is also important to consider the order of the performed data quality checks. For example, checking for required arguments inside a file cannot happen before a data corruption check.
 
-\subsection{Conversion Stage Transformation and Output Data Events}
+\subsection{Conversion Stage Transformation and Output Data Events} \label{sec:4-1-4}
 The same procedure needs to be applied for transformation and output data within the specific stage. This might include similar or different threshold and event severity definitions. In the case of the Conversion Stage, the transformation of the data is purely focussed on its formatting. This means that the outcome for each further step is deterministic. If an error occurs during the transformation, this implies software-side issues within the solution that need to be tested and ruled out individually. From a data perspective, the input data has been validated prior to the first transformation step and, thus, cannot be the reason for incorrect, further performance.
 
-This means that all upcoming data events resulting in errors during transformation or within output data need to be treated with \texttt{FATAL} severity level, resulting in instant termination once such an error occurs. This measure can help detect an underlying source code problem in the transformation steps during analysis.
+This means that all upcoming data events resulting in errors during transformation or within output data need to be treated with \texttt{CRITICAL} severity level, resulting in instant termination once such an error occurs. This measure can help detect an underlying source code problem in the transformation steps during analysis.
 
 In other cases (e.g. \acs{ml} model training, which is not deterministic), the previous paragraph does not apply. Based on the use case and its circumstances, the handling of errors of all sorts need to be evaluated and defined appropriately.
 
@@ -179,10 +177,10 @@ The final step of the DataOps Testing framework design is to validate the functi
 \end{itemize}
 \subsection{Conversion Stage Testing Architecture}
 \subsubsection{Conversion Stage Unit Testing}
-Inside the Conversion Stage, Unit Testing does not play a major role. This is because the majority of tasks performed by the stage are data-orientated. Prior to the analytics performance, the stage evaluates the environment variables of the system that are expected to contain the \ac{uri} paths to the data source and data destination within the \ac{s3} data lake. This process is subject to unit testing.
+Inside the Conversion Stage, unit testing does not play a major role. This is because the majority of tasks performed by the stage are data-orientated. Prior to the analytics performance, the stage evaluates the environment variables of the system that are expected to contain the \ac{uri} paths to the data source and data destination within the \ac{s3} data lake. A similar measure happens for the validation of resource access credentials. These processes are subject to unit testing.
 
 \subsubsection{Conversion Stage Integration (Data) Testing}
-Integration tests play the most important role inside the testing framework. Since all data (production-grade data as well as test data suites) reside on the external \ac{s3} data lake, this needs to be taken into account during testing. Integration testing within this solution can be divided into two parts: First, each data event is evaluated individually based on its predefined single-event test data (cf. Section \ref{sec:4-single-event}). In this part, the tests validate that each data issue is \textit{recognized} and \textit{handled} in its appropriate context. When a corrupted \ac{xml} file is provided, this needs to be recognized (i.e., logged and reported) as well as handled (i.e., corrupted data is removed from analysis).
+Integration tests play the most important role inside the testing framework. Since all data (production-grade data as well as test data suites, for the sake of centralization) reside on the external \ac{s3} data lake, the interplay with this infrastructure component needs to be taken into account during testing. Integration testing within this solution can be divided into two parts: First, each data event is evaluated individually based on its predefined single-event test data (cf. Section \ref{sec:4-single-event}). In this part, the tests validate that each data issue is \textit{recognized} and \textit{handled} in its appropriate context. When a corrupted \ac{xml} file is provided, this needs to be recognized (i.e., logged and reported) as well as handled (i.e., corrupted data is removed from analysis).
 
 When this validation is conducted successfully, the multi-event test data (cf. Section \ref{sec:4-multi-event} can be induced for similar test cases. At this point, the general functionality of the individual data handling measures can be expected. Finally, the test data suite(s) (cf. Section \ref{sec:4-test-suites}) are used to test the thresholding capability of the solution, which is not testable with single-file test cases.
 
@@ -190,8 +188,8 @@ When this validation is conducted successfully, the multi-event test data (cf. S
 The final testing stage inside the Conversion Stage should also take all remaining infrastructure into account. In this case, this includes Airflow, which should be triggered by the end-to-end test and receive the test data suites. Airflow runs through the entire data pipeline and reports its production-like outcome which is then evaluated by the end-to-end test. This will ensure that no dependencies have been left out during testing.
 
 \subsection{Application of DataOps Testing}
-The testing framework is applied whenever a new version of the analytics solution is about to be deployed into production. In case a new feature is developed or an existing feature is updated or removed, the tests ensure that the core analytics capacity is maintained. Without these tests, version dependencies or classical software bugs could be deployed into production, resulting in analytics result issues or unresolvable crashes of the system. In case one of the test cases does not pass, the deployment is not continued which allows the correction of the underlying process. This procedure is repeated until all tests have passed. In case of the development of entirely new features or data handling measurements, applicable test cases need to be created to validate these features, as well. This includes regression testing, taking requirements from other stages into account. \\\
+The testing framework is applied whenever a new version of the analytics solution is about to be deployed into production. In case a new feature is developed or an existing feature is updated or removed, the tests ensure that the core analytics capacity is maintained. Without these tests, version dependencies or classical software bugs could be deployed into production, resulting in analytics result issues or unresolvable crashes of the system. In case one of the test cases does not pass, the deployment is not performed which allows the correction of the underlying process. This procedure is repeated until all tests have passed. In case of the development of entirely new features or data handling measurements, applicable test cases need to be created to validate these features, as well. This includes regression testing, taking requirements from remaining features and other stages into account. \\\
 
-Again, this testing framework design process needs to be individually applied to the context of the given use case. Other solutions might require more extensive unit testing or have a more complex end-to-end testing structure. These requirements need to be evaluated prior to design and implementation.
+Again, this testing framework design process needs to be individually applied to the context of the given use case. Other solutions might require more extensive unit testing or have a more complex end-to-end testing structure. These requirements need to be evaluated prior to test design and implementation.
 
-The testing implementation process itself is even more individual. This is because different ways of implementation might lead to the same outcome. The implementation of the testing framework for the Conversion Stage will be described in the following chapter.
+The testing implementation process itself is even more individual. This is because different ways of implementation might lead to the same outcome. The implementation of the testing framework for the Conversion Stage will be described in the next chapter.
