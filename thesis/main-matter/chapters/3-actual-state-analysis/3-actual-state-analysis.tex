@@ -8,7 +8,7 @@ As stated in the \nameref{chap:introduction} chapter, the project is conducted b
 The data pipeline at hand is four-stage pipeline that creates a \acf{mba} for \ac{bi} and reporting purposes. \ac{mba} is one of the key techniques used by retail companies to uncover associations and patterns within item purchases. It works by looking for combinations of items that occur together frequently in transactions \cite[1]{Chen2005}. The specific \ac{mba} performed at the end of this data pipeline provides two kinds of information. First, it describes item sets that are frequently purchased together. Specifically, the higher the \textit{support} of an item set, the higher the probability that these items are purchased together. The \textit{Apriori} algorithm is a widely used method to accomplish this \cite[12\psq]{Wu2008}. Second, the \ac{mba} calculates other association metrics (i.e., \textit{confidence} and \textit{lift}) of the item sets, allowing for backed decision-making with regard to marketing campaigns, inventory stock-up, etc.
 
 \acp{mba} are based on a large amount of \acf{pos} data. This data needs to be integrated by means of the analytics engine requirements in order to be used for \ac{mba} purposes.
-
+\newpage
 \section{Analytics Solution Components}
 The data pipeline consists of various infrastructural and technical components. This also includes the input and output formats of the analyses. These components are described in the following.
 

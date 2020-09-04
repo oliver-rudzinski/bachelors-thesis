@@ -87,7 +87,7 @@ Considering the \ac{mba} data pipeline, the present variety of resources require
 	\begin{tabular}{r!{\vrule width 1pt}l|l|l}
 \textbf{Component}                                  & \textbf{Resource}         & \textbf{Type} & \textbf{Scope}              \\ \ChangeRT{1pt}
 \multirow{2}{*}{Airflow}                            & \ac{ecr} & Full Access   & designated stage image repositories          \\ \cline{2-4}
-                                                    & \ac{ecs} & Full Access   & designated container cluster                 \\	 \ChangeRT{1pt}
+                                                    & \ac{ecs} & Full Access   & designated container service                 \\	 \ChangeRT{1pt}
 \multicolumn{4}{c}{\textbf{Stages}}                                                                                           \\ \ChangeRT{1pt}
 \multirow{2}{*}{\textbf{Transformation}}            & \ac{s3}  & Read          & \texttt{./landing/}      				  \\ \cline{2-4}
                                                     & \ac{s3}  & Write         & \texttt{./**/raw/}       				  \\ \hline
